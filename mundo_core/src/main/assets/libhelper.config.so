@@ -1,0 +1,15 @@
+{
+  "interaction": {
+    "type": "script",
+    "path": "/data/local/tmp/bearmod_injection.js",
+    "on_change": "reload"
+  },
+  "teardown": "minimal",
+  "runtime": "v8",
+  "code_tracing": false,
+  "stalker": {
+    "trust_threshold": 3,
+    "queue_capacity": 16384,
+    "queue_drain_interval": 250
+  }
+}

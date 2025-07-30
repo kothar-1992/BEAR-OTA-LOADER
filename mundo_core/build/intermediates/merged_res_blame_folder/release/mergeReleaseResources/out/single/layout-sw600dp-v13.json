@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.bearmod.mundo.mundo_core-release-30:/layout-sw600dp-v13/design_layout_snackbar.xml",
+        "source": "com.bearmod.mundo.mundo_core-material-1.12.0-20:/layout-sw600dp-v13/design_layout_snackbar.xml"
+    },
+    {
+        "merged": "com.bearmod.mundo.mundo_core-release-30:/layout-sw600dp-v13/mtrl_layout_snackbar.xml",
+        "source": "com.bearmod.mundo.mundo_core-material-1.12.0-20:/layout-sw600dp-v13/mtrl_layout_snackbar.xml"
+    }
+]

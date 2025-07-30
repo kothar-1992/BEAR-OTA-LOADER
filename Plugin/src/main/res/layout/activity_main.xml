@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".ui.main.MainActivity"
+    tools:openDrawer="start">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Modern AppBar with gradient background -->
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/Theme.BearLoader.NoActionBar"
+            android:background="@drawable/splash_gradient">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@android:color/transparent"
+                app:popupTheme="@style/Theme.BearLoader.NoActionBar"
+                app:title="@string/dashboard_title"
+                app:titleTextColor="@color/white" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!-- Main content with modern dark theme -->
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/background"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="32dp">
+
+                <!-- Welcome section -->
+                <TextView
+                    android:id="@+id/tv_welcome"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginEnd="24dp"
+                    android:text="Select Target Application"
+                    android:textColor="@color/text_primary"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.02"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_subtitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="24dp"
+                    android:text="Choose your PUBG variant to begin"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="16sp"
+                    android:alpha="0.8"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_welcome" />
+
+                <!-- PUBG Global Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_pubg_global"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="20dp"
+                    app:cardBackgroundColor="@color/card_background"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="12dp"
+                    app:strokeColor="@color/surface_container_high"
+                    app:strokeWidth="1dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_subtitle">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="24dp">
+
+                        <ImageView
+                            android:id="@+id/iv_pubg_global_icon"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:src="@drawable/pubg_global"
+                            android:contentDescription="PUBG Global"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tv_pubg_global_name"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="PUBG Mobile Global"
+                            android:textColor="@color/text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toStartOf="@+id/switch_pubg_global"
+                            app:layout_constraintStart_toEndOf="@+id/iv_pubg_global_icon"
+                            app:layout_constraintTop_toTopOf="@+id/iv_pubg_global_icon" />
+
+                        <TextView
+                            android:id="@+id/tv_pubg_global_package"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="4dp"
+                            android:text="com.tencent.ig"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp"
+                            android:fontFamily="monospace"
+                            app:layout_constraintEnd_toStartOf="@+id/switch_pubg_global"
+                            app:layout_constraintStart_toEndOf="@+id/iv_pubg_global_icon"
+                            app:layout_constraintTop_toBottomOf="@+id/tv_pubg_global_name" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_pubg_global"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            app:thumbTint="@color/primary"
+                            app:trackTint="@color/surface_container_high"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/iv_pubg_global_icon"
+                            app:layout_constraintBottom_toBottomOf="@+id/iv_pubg_global_icon" />
+
+                        <View
+                            android:id="@+id/status_indicator_global"
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/circle_background"
+                            android:backgroundTint="@color/error"
+                            app:layout_constraintStart_toStartOf="@+id/iv_pubg_global_icon"
+                            app:layout_constraintTop_toBottomOf="@+id/iv_pubg_global_icon" />
+
+                        <TextView
+                            android:id="@+id/tv_status_global"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Inactive"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            app:layout_constraintStart_toEndOf="@+id/status_indicator_global"
+                            app:layout_constraintTop_toTopOf="@+id/status_indicator_global"
+                            app:layout_constraintBottom_toBottomOf="@+id/status_indicator_global" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- PUBG Korea Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_pubg_korea"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="20dp"
+                    app:cardBackgroundColor="@color/card_background"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="12dp"
+                    app:strokeColor="@color/surface_container_high"
+                    app:strokeWidth="1dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/card_pubg_global">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="24dp">
+
+                        <ImageView
+                            android:id="@+id/iv_pubg_korea_icon"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:src="@drawable/pubg_korea"
+                            android:contentDescription="PUBG Korea"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tv_pubg_korea_name"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="PUBG Mobile Korea"
+                            android:textColor="@color/text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toStartOf="@+id/switch_pubg_korea"
+                            app:layout_constraintStart_toEndOf="@+id/iv_pubg_korea_icon"
+                            app:layout_constraintTop_toTopOf="@+id/iv_pubg_korea_icon" />
+
+                        <TextView
+                            android:id="@+id/tv_pubg_korea_package"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="4dp"
+                            android:text="com.pubg.krmobile"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp"
+                            android:fontFamily="monospace"
+                            app:layout_constraintEnd_toStartOf="@+id/switch_pubg_korea"
+                            app:layout_constraintStart_toEndOf="@+id/iv_pubg_korea_icon"
+                            app:layout_constraintTop_toBottomOf="@+id/tv_pubg_korea_name" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_pubg_korea"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            app:thumbTint="@color/primary"
+                            app:trackTint="@color/surface_container_high"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/iv_pubg_korea_icon"
+                            app:layout_constraintBottom_toBottomOf="@+id/iv_pubg_korea_icon" />
+
+                        <View
+                            android:id="@+id/status_indicator_korea"
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/circle_background"
+                            android:backgroundTint="@color/error"
+                            app:layout_constraintStart_toStartOf="@+id/iv_pubg_korea_icon"
+                            app:layout_constraintTop_toBottomOf="@+id/iv_pubg_korea_icon" />
+
+                        <TextView
+                            android:id="@+id/tv_status_korea"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Inactive"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            app:layout_constraintStart_toEndOf="@+id/status_indicator_korea"
+                            app:layout_constraintTop_toTopOf="@+id/status_indicator_korea"
+                            app:layout_constraintBottom_toBottomOf="@+id/status_indicator_korea" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- PUBG Vietnam Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_pubg_vietnam"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="20dp"
+                    app:cardBackgroundColor="@color/card_background"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="12dp"
+                    app:strokeColor="@color/surface_container_high"
+                    app:strokeWidth="1dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/card_pubg_korea">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="24dp">
+
+                        <ImageView
+                            android:id="@+id/iv_pubg_vietnam_icon"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:src="@drawable/pubg_vietnam"
+                            android:contentDescription="PUBG Vietnam"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tv_pubg_vietnam_name"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="PUBG Mobile Vietnam"
+                            android:textColor="@color/text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toStartOf="@+id/switch_pubg_vietnam"
+                            app:layout_constraintStart_toEndOf="@+id/iv_pubg_vietnam_icon"
+                            app:layout_constraintTop_toTopOf="@+id/iv_pubg_vietnam_icon" />
+
+                        <TextView
+                            android:id="@+id/tv_pubg_vietnam_package"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="4dp"
+                            android:text="com.vng.pubgmobile"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp"
+                            android:fontFamily="monospace"
+                            app:layout_constraintEnd_toStartOf="@+id/switch_pubg_vietnam"
+                            app:layout_constraintStart_toEndOf="@+id/iv_pubg_vietnam_icon"
+                            app:layout_constraintTop_toBottomOf="@+id/tv_pubg_vietnam_name" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_pubg_vietnam"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            app:thumbTint="@color/primary"
+                            app:trackTint="@color/surface_container_high"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/iv_pubg_vietnam_icon"
+                            app:layout_constraintBottom_toBottomOf="@+id/iv_pubg_vietnam_icon" />
+
+                        <View
+                            android:id="@+id/status_indicator_vietnam"
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/circle_background"
+                            android:backgroundTint="@color/error"
+                            app:layout_constraintStart_toStartOf="@+id/iv_pubg_vietnam_icon"
+                            app:layout_constraintTop_toBottomOf="@+id/iv_pubg_vietnam_icon" />
+
+                        <TextView
+                            android:id="@+id/tv_status_vietnam"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Inactive"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            app:layout_constraintStart_toEndOf="@+id/status_indicator_vietnam"
+                            app:layout_constraintTop_toTopOf="@+id/status_indicator_vietnam"
+                            app:layout_constraintBottom_toBottomOf="@+id/status_indicator_vietnam" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- PUBG Taiwan Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_pubg_taiwan"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="20dp"
+                    app:cardBackgroundColor="@color/card_background"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="12dp"
+                    app:strokeColor="@color/surface_container_high"
+                    app:strokeWidth="1dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/card_pubg_vietnam">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="24dp">
+
+                        <ImageView
+                            android:id="@+id/iv_pubg_taiwan_icon"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:src="@drawable/pubg_taiwan"
+                            android:contentDescription="PUBG Taiwan"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tv_pubg_taiwan_name"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="PUBG Mobile Taiwan"
+                            android:textColor="@color/text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toStartOf="@+id/switch_pubg_taiwan"
+                            app:layout_constraintStart_toEndOf="@+id/iv_pubg_taiwan_icon"
+                            app:layout_constraintTop_toTopOf="@+id/iv_pubg_taiwan_icon" />
+
+                        <TextView
+                            android:id="@+id/tv_pubg_taiwan_package"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="4dp"
+                            android:text="com.rekoo.pubgm"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp"
+                            android:fontFamily="monospace"
+                            app:layout_constraintEnd_toStartOf="@+id/switch_pubg_taiwan"
+                            app:layout_constraintStart_toEndOf="@+id/iv_pubg_taiwan_icon"
+                            app:layout_constraintTop_toBottomOf="@+id/tv_pubg_taiwan_name" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_pubg_taiwan"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            app:thumbTint="@color/primary"
+                            app:trackTint="@color/surface_container_high"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/iv_pubg_taiwan_icon"
+                            app:layout_constraintBottom_toBottomOf="@+id/iv_pubg_taiwan_icon" />
+
+                        <View
+                            android:id="@+id/status_indicator_taiwan"
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/circle_background"
+                            android:backgroundTint="@color/error"
+                            app:layout_constraintStart_toStartOf="@+id/iv_pubg_taiwan_icon"
+                            app:layout_constraintTop_toBottomOf="@+id/iv_pubg_taiwan_icon" />
+
+                        <TextView
+                            android:id="@+id/tv_status_taiwan"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Inactive"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            app:layout_constraintStart_toEndOf="@+id/status_indicator_taiwan"
+                            app:layout_constraintTop_toTopOf="@+id/status_indicator_taiwan"
+                            app:layout_constraintBottom_toBottomOf="@+id/status_indicator_taiwan" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <!-- Modern Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/background_light"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header"
+        app:itemIconTint="@color/text_primary"
+        app:itemTextColor="@color/text_primary"
+        app:menu="@menu/drawer_menu" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

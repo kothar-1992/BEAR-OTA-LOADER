@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "com.bearmod.mundo.mundo_core-release-30:/layout-land/material_timepicker.xml",
+        "source": "com.bearmod.mundo.mundo_core-material-1.12.0-20:/layout-land/material_timepicker.xml"
+    },
+    {
+        "merged": "com.bearmod.mundo.mundo_core-release-30:/layout-land/material_clock_period_toggle_land.xml",
+        "source": "com.bearmod.mundo.mundo_core-material-1.12.0-20:/layout-land/material_clock_period_toggle_land.xml"
+    },
+    {
+        "merged": "com.bearmod.mundo.mundo_core-release-30:/layout-land/mtrl_picker_header_dialog.xml",
+        "source": "com.bearmod.mundo.mundo_core-material-1.12.0-20:/layout-land/mtrl_picker_header_dialog.xml"
+    }
+]
