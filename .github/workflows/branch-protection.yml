@@ -1,0 +1,151 @@
+name: Branch Protection
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  enforce-protection:
+    name: Enforce Branch Protection
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check PR Requirements
+      run: |
+        echo "## Branch Protection Checks" >> $GITHUB_STEP_SUMMARY
+        
+        # Check if PR has description
+        if [ -z "${{ github.event.pull_request.body }}" ]; then
+          echo "❌ PR must have a description" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        else
+          echo "✅ PR has description" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Check if PR title follows convention
+        TITLE="${{ github.event.pull_request.title }}"
+        if [[ ! "$TITLE" =~ ^(🚀|🐛|📚|🔧|⚡|🎨|🔒|🧪).* ]]; then
+          echo "❌ PR title must start with emoji prefix (🚀🐛📚🔧⚡🎨🔒🧪)" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        else
+          echo "✅ PR title follows convention" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Check File Changes
+      run: |
+        # Get list of changed files
+        git diff --name-only origin/main...HEAD > changed_files.txt
+        
+        # Check for sensitive file modifications
+        SENSITIVE_FILES=(
+          "app/src/main/cpp/Android.mk"
+          "app/build.gradle.kts"
+          ".github/workflows/"
+        )
+        
+        for file in "${SENSITIVE_FILES[@]}"; do
+          if grep -q "$file" changed_files.txt; then
+            echo "⚠️ Sensitive file modified: $file" >> $GITHUB_STEP_SUMMARY
+          fi
+        done
+        
+        # Check for large file additions
+        while read -r file; do
+          if [ -f "$file" ]; then
+            SIZE=$(stat -c%s "$file" 2>/dev/null || echo 0)
+            if [ $SIZE -gt 1048576 ]; then  # 1MB
+              echo "⚠️ Large file added: $file ($(($SIZE / 1024))KB)" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+        done < changed_files.txt
+
+    - name: Validate Commit Messages
+      run: |
+        # Check commit message format
+        git log --oneline origin/main..HEAD | while read -r commit; do
+          MESSAGE=$(echo "$commit" | cut -d' ' -f2-)
+          if [[ ! "$MESSAGE" =~ ^(feat|fix|docs|style|refactor|test|chore|security)(\(.+\))?: ]]; then
+            echo "⚠️ Commit message should follow conventional format: $MESSAGE" >> $GITHUB_STEP_SUMMARY
+          fi
+        done
+
+  security-review:
+    name: Security Review
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Security Scan
+      run: |
+        echo "## Security Review" >> $GITHUB_STEP_SUMMARY
+        
+        # Check for hardcoded secrets
+        if grep -r -i "password\|secret\|key\|token" --include="*.java" --include="*.kt" app/src/; then
+          echo "⚠️ Potential hardcoded secrets found" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ No hardcoded secrets detected" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Check for debug logging
+        if grep -r "Log\." --include="*.java" --include="*.kt" app/src/; then
+          echo "⚠️ Debug logging found - review for sensitive data" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ No debug logging detected" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Dependency Check
+      run: |
+        # Check for new dependencies
+        if git diff --name-only origin/main...HEAD | grep -q "build.gradle"; then
+          echo "⚠️ Build configuration changed - review dependencies" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  auto-merge-check:
+    name: Auto-merge Eligibility
+    runs-on: ubuntu-latest
+    needs: [enforce-protection, security-review]
+    if: github.event.pull_request.draft == false
+
+    steps:
+    - name: Check Auto-merge Eligibility
+      run: |
+        echo "## Auto-merge Eligibility" >> $GITHUB_STEP_SUMMARY
+        
+        # Check if PR is from feature branch
+        if [[ "${{ github.head_ref }}" == feature/* ]]; then
+          echo "✅ Feature branch PR" >> $GITHUB_STEP_SUMMARY
+          ELIGIBLE=true
+        else
+          echo "❌ Not a feature branch" >> $GITHUB_STEP_SUMMARY
+          ELIGIBLE=false
+        fi
+        
+        # Check if all checks passed
+        if [ "$ELIGIBLE" = true ]; then
+          echo "✅ Eligible for auto-merge after approval" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Manual merge required" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Enable Auto-merge
+      if: startsWith(github.head_ref, 'feature/') && github.event.pull_request.user.login == github.repository_owner
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.pulls.createReview({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number,
+            event: 'APPROVE',
+            body: '✅ Auto-approved: Feature branch from repository owner'
+          });
