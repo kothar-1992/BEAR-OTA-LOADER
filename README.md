@@ -21,7 +21,7 @@
 
 - **Android Studio** 2023.1.1 or later
 - **JDK 17** or later
-- **Android NDK 25.1.8937393**
+- **Android NDK 27.1.12297006**
 - **Git** for version control
 
 ### 🔨 Quick Build (Simplified)
