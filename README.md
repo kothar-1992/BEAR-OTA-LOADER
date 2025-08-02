@@ -19,14 +19,47 @@
 
 ### Prerequisites
 
-- **Android Studio** (Arctic Fox or newer)
-- **Java 8+** and optionally **Kotlin**
-- **NDK** (Native Development Kit)
-- **Frida** (for runtime scripting)
-- **Python 3** (for CI scripts)
-- (Recommended) Linux or MacOS for native builds
+- **Android Studio** 2023.1.1 or later
+- **JDK 17** or later
+- **Android NDK 25.1.8937393**
+- **Git** for version control
 
-### Build Instructions
+### 🔨 Quick Build (Simplified)
+
+#### Windows
+```batch
+# Build debug APK
+build.bat debug
+
+# Build release APK
+build.bat release
+
+# Clean project
+build.bat clean
+
+# Run tests
+build.bat test
+```
+
+#### Linux/macOS
+```bash
+# Make script executable
+chmod +x build.sh
+
+# Build debug APK
+./build.sh debug
+
+# Build release APK
+./build.sh release
+
+# Clean project
+./build.sh clean
+
+# Run tests
+./build.sh test
+```
+
+### Manual Build Instructions
 
 1. **Clone the repository**
    ```sh
