@@ -1,325 +1,178 @@
 package com.bearmod;
-import android.annotation.SuppressLint;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.provider.Settings;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.Toast;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.Color;
-import android.widget.TextView;
-import android.view.Gravity;
-import android.app.Dialog;
-import android.os.Handler;
-import android.os.Message;
+import android.util.Log;
+
 import android.app.Activity;
 
-import java.util.Objects;
+import com.bearmod.auth.SimpleLicenseVerifier;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Launcher {
-
     private static final String TAG = "Launcher";
-
-    @SuppressLint("StaticFieldLeak")
-    public static Activity d_activity;
+    private static final AtomicBoolean isInitializing = new AtomicBoolean(false);
+    private static final Object lockObject = new Object();
     private static volatile SharedPreferences gifs;
 
-    // REMOVED: UI String JNI methods - replaced with Plugin module's modern authentication UI
-    // These 9 methods were removed as part of Plan-A cleanup:
-    // LoginNameNrg(), Pleaselog(), KeyAdd(), Login(), Cancel(), Error(), Pleasecheck(), Ok(), Loging(), Link()
-    
+
+
+
+    private static boolean nativeLibraryLoaded = false;
 
     static{
-       System.loadLibrary("BearMod");
-        System.loadLibrary("BEAR");
+        try {
+            System.loadLibrary("BearMod");
+            System.loadLibrary("BEAR");
+            nativeLibraryLoaded = true;
+            android.util.Log.d("Launcher", "Native library loaded successfully");
+        } catch (UnsatisfiedLinkError e) {
+            android.util.Log.e("Launcher", "Failed to load native library: " + e.getMessage());
+            nativeLibraryLoaded = false;
+        }
     }
 
-    @SuppressLint("SetTextI18n")
+
     public static void Init(Object object) {
-        final Context context = (Context) object;
-        Activity m_Activity = (Activity) object;
-        final Activity ggActivity = (Activity) object;
-        Init(context);
-         d_activity = m_Activity;
+        try {
+            if (object == null) return;
+            if (!isInitializing.compareAndSet(false, true)) return;
 
+            synchronized (lockObject) {
+                final Context context = (Context) object;
+                Activity activity = (Activity) object;
 
+                Init(context);
 
-        if (!Settings.canDrawOverlays(context)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
-            m_Activity.startActivity(intent);
-        }
-
-        gifs = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-
-        if (!gifs.contains("USER_KEY")) {
-
-            final SharedPreferences sharedPreferences = context.getSharedPreferences("SavePref", 0);
-            sharedPreferences.getString("User", null);
-            sharedPreferences.getString("Pass", null);
-
-            //Create LinearLayout
-            LinearLayout linearLayout = new LinearLayout(context);
-            linearLayout.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
-            linearLayout.setOrientation(LinearLayout.VERTICAL);
-            GradientDrawable gradientdrawable = new GradientDrawable();
-            gradientdrawable.setCornerRadius(30); //Set corner
-            gradientdrawable.setColor(Color.parseColor("#FFF1F1F1")); //Set background color
-            gradientdrawable.setStroke(0, Color.parseColor("#32cb00")); //Set 
-            linearLayout.setBackground(gradientdrawable);
-
-
-
-            TextView txt = new TextView(context);
-            txt.setGravity(Gravity.CENTER);
-            txt.setText("Bear MOD Login"); // Hardcoded - was LoginNameNrg()
-            txt.setTextColor(0xFF181818);
-            txt.setBackgroundColor(Color.TRANSPARENT);
-            txt.setTextSize(19);
-            txt.setPadding(1,1,1,1);
-
-
-            TextView txt1 = new TextView(context);
-            txt1.setGravity(Gravity.CENTER);
-            txt1.setText("Enter your registered key to log in"); // Hardcoded - was Pleaselog()
-            txt1.setTextColor(0xFF151515);
-            txt1.setBackgroundColor(Color.TRANSPARENT);
-            txt1.setTextSize(9);
-
-
-            final EditText editTextUser = new EditText(context);
-            editTextUser.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-            editTextUser.setTextColor(Color.parseColor("#000000bb"));
-            editTextUser.setHint("Key..."); // Hardcoded - was KeyAdd()
-      //      editTextUser.setTextSize(10);//add
-            editTextUser.setGravity(Gravity.CENTER);
-            editTextUser.setTextColor(Color.parseColor("#000000")); // Черный текст
-
-
-            //  editTextUser.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14); // Размер текста в sp
-
-// Установка линии в центре ввода текста
-            editTextUser.setBackgroundColor(Color.parseColor("#000000")); // Черный цвет
-            editTextUser.setHintTextColor(Color.parseColor("#000000")); // Черный цвет подсказки
-
-// Создание градиента для обводки
-            GradientDrawable strokeDrawable = new GradientDrawable();
-            strokeDrawable.setShape(GradientDrawable.RECTANGLE);
-            strokeDrawable.setColor(Color.parseColor("#fafafa")); // Красный цвет
-            strokeDrawable.setCornerRadius(20); //Set corner
-            strokeDrawable.setStroke(30, Color.TRANSPARENT); // Толщина обводки 30 и черный цвет
-
-            editTextUser.setBackground(strokeDrawable);
-
-            LinearLayout ln3 = new LinearLayout(context);
-            ln3.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int)1));
-            ln3.setOrientation(LinearLayout.HORIZONTAL);
-            ln3.setGravity(Gravity.CENTER);
-            ln3.setBackgroundColor(Color.GRAY);
-
-
-            LinearLayout ln2 = new LinearLayout(context);
-            ln2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, -1));
-            ln2.setOrientation(LinearLayout.HORIZONTAL);
-            ln2.setGravity(Gravity.CENTER);
-
-
-            Button button = new Button(context);
-            button.setTextColor(Color.BLUE);
-            button.setText("                Login                "); // Hardcoded - was Login()
-            button.setBackgroundColor(Color.TRANSPARENT);
-
-            LinearLayout ln4 = new LinearLayout(context);
-            ln4.setLayoutParams(new LinearLayout.LayoutParams((int)1,LinearLayout.LayoutParams.MATCH_PARENT));
-            ln4.setOrientation(LinearLayout.HORIZONTAL);
-            ln4.setGravity(Gravity.CENTER);
-            ln4.setBackgroundColor(Color.GRAY);
-
-            //Create button
-            Button button2 = new Button(context);
-            button.setTextColor(Color.BLUE);
-            button2.setText("               JOIN               "); // Hardcoded - was Cancel()
-            button2.setBackgroundColor(Color.TRANSPARENT);
-
-            linearLayout.addView(txt);
-            linearLayout.addView(txt1);
-            linearLayout.addView(editTextUser);
-
-            linearLayout.addView(ln3);
-            ln2.addView(button2);
-            ln2.addView(ln4);
-            ln2.addView(button);
-            linearLayout.addView(ln2);
-
-            final Dialog builder = new Dialog(context);
-            builder.setCancelable(false);
-            builder.setContentView(linearLayout);
-            Objects.requireNonNull(builder.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
-
-            button.setOnClickListener(view -> {
-                String userKey = editTextUser.getText().toString();
-                Login(context, userKey);
-                builder.dismiss();
-            });
-            button2.setOnClickListener(view -> {
-
-
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://t.me/Bear_Mod")); // Hardcoded - was Link()
-                ggActivity.startActivity(intent);
-
-            });
-            builder.show();
-        } else{
-            Login(context, gifs.getString("USER_KEY", null));
-        }
-    }
-
-
-
-    @SuppressLint("SetTextI18n")
-    private static void Login(final Context kontes, final String userKey) {
-        LinearLayout linearLayout = new LinearLayout(kontes);
-        linearLayout.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-
-        GradientDrawable gradientdrawable = new GradientDrawable();
-        gradientdrawable.setCornerRadius(20); //Set corner
-        gradientdrawable.setColor(Color.parseColor("#FFF1F1F1")); //Set background color
-        gradientdrawable.setStroke(0, Color.parseColor("#32cb00")); //Set 
-        linearLayout.setBackground(gradientdrawable);
-        TextView txt = new TextView(kontes);
-        txt.setGravity(Gravity.CENTER);
-        txt.setText("  Please wait...  "); // Hardcoded - was Loging()
-
-        txt.setTextColor(0xFF181818);
-        txt.setBackgroundColor(Color.TRANSPARENT);
-        txt.setTextSize(20);
-        
-    
-        
-        linearLayout.addView(txt);
-        final Dialog builder = new Dialog(kontes);
-        builder.setCancelable(false);
-        builder.setContentView(linearLayout);
-        Objects.requireNonNull(builder.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
-        
-        builder.show();
-
-        @SuppressLint("HandlerLeak") final  Handler sagen = new Handler() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void handleMessage(Message ems) {
-                if (ems.what == 0) {
-            Toast.makeText(kontes, "Key Work", Toast.LENGTH_SHORT).show();
-                    new ImGui(kontes);
-                } else if (ems.what == 1) {
-                    LinearLayout linearLayout = new LinearLayout(kontes);
-                    linearLayout.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
-                    linearLayout.setOrientation(LinearLayout.VERTICAL);
-
-                    GradientDrawable gradientdrawable = new GradientDrawable();
-                    gradientdrawable.setCornerRadius(30); //Set corner
-                    gradientdrawable.setColor(Color.parseColor("#FFF1F1F1")); //Set background color
-                    gradientdrawable.setStroke(0, Color.parseColor("#32cb00")); //Set 
-                    linearLayout.setBackground(gradientdrawable);
-
-                    //Create username edittext field
-                    TextView txt = new TextView(kontes);
-                    txt.setGravity(Gravity.CENTER);
-                    txt.setText("Error"); // Hardcoded - was Error()
-
-                    txt.setTextColor(0xFF181818);
-                    txt.setBackgroundColor(Color.TRANSPARENT);
-                    txt.setTextSize(20);
-
-                    TextView txt1 = new TextView(kontes);
-                    txt1.setGravity(Gravity.CENTER);
-                    txt1.setText("                               Please check your key                               "); // Hardcoded - was Pleasecheck()
-                    txt1.setTextColor(0xFF595959);
-                    txt1.setBackgroundColor(Color.TRANSPARENT);
-                    txt1.setTextSize(13);
-
-                    final TextView infoText = new TextView(kontes);
-                    infoText.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                    infoText.setGravity(Gravity.CENTER);
-                    infoText.setBackgroundColor(Color.TRANSPARENT);
-                    infoText.setText(ems.obj.toString());
-
-
-                    LinearLayout ln3 = new LinearLayout(kontes);
-                    ln3.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int)1));
-                    ln3.setOrientation(LinearLayout.HORIZONTAL);
-                    ln3.setGravity(Gravity.CENTER);
-                    ln3.setBackgroundColor(Color.GRAY);
-
-
-                    LinearLayout ln2 = new LinearLayout(kontes);
-                    ln2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, -1));
-                    ln2.setOrientation(LinearLayout.HORIZONTAL);
-                    ln2.setGravity(Gravity.CENTER);
-
-
-                    Button button = new Button(kontes);
-                    button.setTextColor(Color.BLUE);
-                    button.setText("                         OK                         "); // Hardcoded - was Ok()
-                    button.setBackgroundColor(Color.TRANSPARENT);
-
-
-                    linearLayout.addView(txt);
-                    linearLayout.addView(txt1);
-                    linearLayout.addView(infoText);
-                    linearLayout.addView(ln3);
-
-                    ln2.addView(button);
-                    linearLayout.addView(ln2);
-
-                    final Dialog builder = new Dialog(kontes);
-                    builder.setCancelable(false);
-                    builder.setContentView(linearLayout);
-                    Objects.requireNonNull(builder.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
-
-
-                    button.setOnClickListener(view -> System.exit(0));
-
-                    builder.show();
-
-
+                // Check overlay permission
+                if (!Settings.canDrawOverlays(context)) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:" + context.getPackageName()));
+                    activity.startActivity(intent);
                 }
-                builder.dismiss();
+
+                try {
+                    gifs = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    isInitializing.set(false);
+                    return;
+                }
+
+                // Login flow is now handled by MainActivity and LauncherLoginActivity
+                // This method is only called to initialize native code
+                android.util.Log.d("Launcher", "Native initialization completed");
             }
-        };
-
-        new Thread(() -> {
-            String result = Check(kontes, userKey);
-            if (result.equals("OK")) {
-                gifs.edit().putString("USER_KEY", userKey).apply();
-
-                sagen.sendEmptyMessage(0);
-            } else {
-                gifs.edit().clear().apply();
-
-                Message ems = new Message();
-                ems.what = 1;
-                ems.obj = result;
-                sagen.sendMessage(ems);
-            }
-        }).start();
-
-
+        } catch (Exception e) {
+            e.printStackTrace();
+            isInitializing.set(false);
+        }
     }
 
-    // TODO Plan-B: REPLACEABLE JNI methods - integrate with mundo_core KeyAuth system
-    // These methods should be replaced with mundo_core authentication bridge:
-    // - Init(Context) -> Replace with MundoCore.getInstance(context).initialize()
-    // - Check(Context, String) -> Replace with MundoCore.getInstance(context).authenticateKeyAuth(userKey)
+    public static boolean hasValidKey(Context context) {
+        // Simple check for stored license key
+        return context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE).contains("USER_KEY");
+    }
+
+    public static boolean isNativeLibraryLoaded() {
+        return nativeLibraryLoaded;
+    }
+
+    public static void clearKey(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+        prefs.edit().remove("USER_KEY").apply();
+    }
+
+    // Native CURL authentication removed - using KeyAuth API only
     private static native void Init(Context mContext);
-    private static native String Check(Context mContext, String userKey);
-    
+
+    // Only keep native Init for ESP/mod functionality
+    public static void safeInit(Context mContext) {
+        if (nativeLibraryLoaded) {
+            try {
+                Init(mContext);
+                android.util.Log.d("Launcher", "Native Init called successfully");
+            } catch (UnsatisfiedLinkError e) {
+                android.util.Log.w("Launcher", "Native Init not available, using fallback");
+            }
+        } else {
+            android.util.Log.i("Launcher", "Running in demo mode - native library not loaded");
+        }
     }
+
+    public static SharedPreferences getGifs() {
+        return gifs;
+    }
+
+    public static void setGifs(SharedPreferences gifs) {
+        Launcher.gifs = gifs;
+    }
+
+    public interface LoginCallback {
+        void onSuccess();
+        void onError(String errorMessage);
+    }
+
+    public static void loginAsync(Context context, String userKey, LoginCallback callback) {
+        Log.d(TAG, "Starting Auth license verification...");
+
+        // Use ONLY KeyAuth API - no fallback to CURL
+        SimpleLicenseVerifier.verifyLicense(context, userKey, new SimpleLicenseVerifier.LicenseCallback() {
+            @Override
+            public void onSuccess(String message) {
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                    Log.d(TAG, "Auth license verification successful: " + message);
+                    // Save the key for future use
+                    SharedPreferences prefs = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+                    prefs.edit().putString("USER_KEY", userKey).apply();
+                    callback.onSuccess();
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                    Log.e(TAG, "Auth license verification failed: " + error);
+                    // No fallback - KeyAuth API only
+                    callback.onError("License verification failed: " + error);
+                });
+            }
+        });
+    }
+
+    // CURL fallback method removed - using KeyAuth API only
+
+    /**
+     * Get device HWID for debugging/logging
+     */
+    public static String getDeviceHWID(Context context) {
+        return com.bearmod.auth.HWID.getHWID();
+    }
+
+    /**
+     * Debug method to log HWID information
+     */
+    public static void debugHWID(Context context) {
+        String hwid = getDeviceHWID(context);
+        android.util.Log.d(TAG, "=== HWID Debug Information ===");
+        android.util.Log.d(TAG, "Current HWID: " + hwid);
+        android.util.Log.d(TAG, "Device Model: " + android.os.Build.MODEL);
+        android.util.Log.d(TAG, "Device Manufacturer: " + android.os.Build.MANUFACTURER);
+        android.util.Log.d(TAG, "Device Brand: " + android.os.Build.BRAND);
+        android.util.Log.d(TAG, "Device Board: " + android.os.Build.BOARD);
+        android.util.Log.d(TAG, "Device Hardware: " + android.os.Build.HARDWARE);
+        android.util.Log.d(TAG, "Device Product: " + android.os.Build.PRODUCT);
+        android.util.Log.d(TAG, "OS Name: " + System.getProperty("os.name"));
+        android.util.Log.d(TAG, "OS Arch: " + System.getProperty("os.arch"));
+        android.util.Log.d(TAG, "OS Version: " + System.getProperty("os.version"));
+        android.util.Log.d(TAG, "CPU Cores: " + Runtime.getRuntime().availableProcessors());
+        android.util.Log.d(TAG, "==============================");
+    }
+
+}
 
 

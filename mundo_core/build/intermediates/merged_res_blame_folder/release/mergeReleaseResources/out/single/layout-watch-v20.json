@@ -1,10 +1,10 @@
 [
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/layout-watch-v20/abc_alert_dialog_button_bar_material.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/layout-watch-v20/abc_alert_dialog_button_bar_material.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/layout-watch-v20/abc_alert_dialog_button_bar_material.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/layout-watch-v20/abc_alert_dialog_title_material.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/layout-watch-v20/abc_alert_dialog_title_material.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/layout-watch-v20/abc_alert_dialog_title_material.xml"
     }
 ]

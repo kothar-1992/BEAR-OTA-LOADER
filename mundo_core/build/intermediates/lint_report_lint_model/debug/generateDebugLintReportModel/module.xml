@@ -4,7 +4,7 @@
     name=":mundo_core"
     type="LIBRARY"
     maven="Bear-Loader:mundo_core:unspecified"
-    agpVersion="8.11.1"
+    agpVersion="8.12.0"
     buildFolder="build"
     bootClassPath="C:\Users\BearOwner\AppData\Local\Android\Sdk\platforms\android-36\android.jar;C:\Users\BearOwner\AppData\Local\Android\Sdk\build-tools\35.0.0\core-lambda-stubs.jar"
     javaSourceLevel="17"

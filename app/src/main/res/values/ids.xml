@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Animation-related IDs -->
+    <item name="breathing_animation" type="id" />
+    <item name="spring_scale_x" type="id" />
+    <item name="spring_scale_y" type="id" />
+    <item name="spring_translation_x" type="id" />
+    <item name="spring_translation_y" type="id" />
+    <item name="parallax_layer" type="id" />
+    <item name="morph_animation" type="id" />
+    <item name="reveal_animation" type="id" />
+    
+    <!-- Navigation IDs for enhanced sidebar -->
+    <item name="nav_main" type="id" />
+    <item name="nav_esp" type="id" />
+    <item name="nav_aimbot" type="id" />
+    <item name="nav_modsskin" type="id" />
+    <item name="nav_settings" type="id" />
+</resources> 

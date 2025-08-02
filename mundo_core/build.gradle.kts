@@ -1,13 +1,6 @@
-import com.android.build.api.dsl.Packaging
-
 plugins {
     id ("com.android.library")
 }
-
-//import org.apache.tools.ant.taskdefs.condition.Os
-
-  //      def targetModules = ["Plugin", "app"]
-//def architectures = ["arm64-v8a", "armeabi-v7a"]
 
 android {
     namespace = "com.bearmod.mundo"
@@ -95,28 +88,6 @@ android {
     ndkVersion = "27.1.12297006"
 }
 
-// ===================================================================
-// Native Runtime Container - Multi-Module Auto-Deploy Configuration
-// ===================================================================
-
-/*
-                if (foundFiles.isEmpty()) {
-                    println "❌ libmundo.so not found for ${arch} in ${sourceDir}"
-                } else {
-                    foundFiles.each { soFile ->
-                        copy {
-                            from soFile
-                            into destDir
-                        }
-                        println "✅ Copied ${soFile} → ${module}/src/main/jniLibs/${arch}/libmundo.so"
-                    }
-                }
-            }
-        }
-    }
-}
-*/
-
 // Final combo task
 tasks.register("rebuildAndDeployLibmundo") {
     group = "mundo_core"
@@ -127,14 +98,15 @@ tasks.register("rebuildAndDeployLibmundo") {
 
 
 
-        dependencies {
-            implementation (libs.appcompat)
-            implementation (libs.material)
+dependencies {
+            
+implementation (libs.appcompat)
+implementation (libs.material)
 
-            testImplementation (libs.junit)
-            androidTestImplementation (libs.ext.junit)
-            androidTestImplementation (libs.espresso.core)
-        }
+testImplementation (libs.junit)
+androidTestImplementation (libs.ext.junit)
+androidTestImplementation (libs.espresso.core)
+}
 
 // ===================================================================
 // Native Runtime Container Configuration Summary

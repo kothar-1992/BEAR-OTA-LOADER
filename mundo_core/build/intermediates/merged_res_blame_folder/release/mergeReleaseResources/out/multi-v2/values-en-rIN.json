@@ -4,7 +4,7 @@
             "outputFile": "com.bearmod.mundo.mundo_core-mergeReleaseResources-28:/values-en-rIN/values-en-rIN.xml",
             "map": [
                 {
-                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\0931c2fb1a9dd04493332d6f2e158b86\\transformed\\core-1.13.0\\res\\values-en-rIN\\values-en-rIN.xml",
+                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\f541594081716b9abcd0431b2d192d70\\transformed\\core-1.13.0\\res\\values-en-rIN\\values-en-rIN.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -21,7 +21,7 @@
                     }
                 },
                 {
-                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\630c194a48492eb5f7015b1d8d465673\\transformed\\appcompat-1.7.1\\res\\values-en-rIN\\values-en-rIN.xml",
+                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\f582c05fa2bd4cd437f2810eb848e46c\\transformed\\appcompat-1.7.1\\res\\values-en-rIN\\values-en-rIN.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -43,7 +43,7 @@
             "outputFile": "com.bearmod.mundo.mundo_core-release-30:/values-en-rIN/values-en-rIN.xml",
             "map": [
                 {
-                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\0931c2fb1a9dd04493332d6f2e158b86\\transformed\\core-1.13.0\\res\\values-en-rIN\\values-en-rIN.xml",
+                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\f541594081716b9abcd0431b2d192d70\\transformed\\core-1.13.0\\res\\values-en-rIN\\values-en-rIN.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -60,7 +60,7 @@
                     }
                 },
                 {
-                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\630c194a48492eb5f7015b1d8d465673\\transformed\\appcompat-1.7.1\\res\\values-en-rIN\\values-en-rIN.xml",
+                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\f582c05fa2bd4cd437f2810eb848e46c\\transformed\\appcompat-1.7.1\\res\\values-en-rIN\\values-en-rIN.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",

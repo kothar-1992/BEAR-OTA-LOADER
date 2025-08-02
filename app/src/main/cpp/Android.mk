@@ -25,12 +25,34 @@ include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE  := BearMod
 
-LOCAL_CFLAGS := -Wno-error=format-security -fvisibility=hidden -ffunction-sections -fdata-sections -w
-LOCAL_CFLAGS += -fno-rtti -fno-exceptions -fpermissive
-LOCAL_CPPFLAGS := -Wno-error=format-security -fvisibility=hidden -ffunction-sections -fdata-sections -w -Werror -s -std=c++17
-LOCAL_CPPFLAGS += -Wno-error=c++11-narrowing -fms-extensions -fno-rtti -fno-exceptions -fpermissive
-LOCAL_LDFLAGS += -Wl,--gc-sections,--strip-all, -llog
-LOCAL_ARM_MODE := arm
+# LOCAL_CFLAGS := -Wno-error=format-security -fvisibility=hidden -ffunction-sections -fdata-sections -w
+# LOCAL_CFLAGS += -fno-rtti -fno-exceptions -fpermissive
+# LOCAL_CPPFLAGS := -Wno-error=format-security -fvisibility=hidden -ffunction-sections -fdata-sections -w -Werror -s -std=c++17
+# LOCAL_CPPFLAGS += -Wno-error=c++11-narrowing -fms-extensions -fno-rtti -fno-exceptions -fpermissive
+# LOCAL_LDFLAGS += -Wl,--gc-sections,--strip-all, -llog
+# LOCAL_ARM_MODE := arm
+
+# Compiler flags
+LOCAL_CFLAGS := \
+    -Wno-error=format-security \
+    -fvisibility=hidden \
+    -ffunction-sections \
+    -fdata-sections \
+    -w \
+    -fpermissive \
+    -DANDROID_NDK \
+    -D__ANDROID__ \
+    -DANDROID_ARM_NEON \
+    -DPRODUCTION_BUILD \
+    -DNONROOT_SUPPORT_ENABLED \
+    -DFRIDA_GADGET_SUPPORT \
+    -DOBJECTION_PATCHER_SUPPORT
+
+    LOCAL_CPPFLAGS := \
+    -std=c++17 \
+    -fexceptions \
+    -frtti \
+    -fms-extensions
 
 LOCAL_C_INCLUDES += $(MAIN_LOCAL_PATH)
 
@@ -73,14 +95,37 @@ LOCAL_SRC_FILES := main.cpp \
     SDK/ARMP_PUBGM_Engine_functions.cpp \
     SDK/ARMP_PUBGM_ShadowTrackerExtra_functions.cpp \
     SDK/ARMP_PUBGM_Client_functions.cpp \
+    nonroot/frida_gadget_manager.cpp \
+    nonroot/objection_patcher.cpp \
+    nonroot/nonroot_injector.cpp \
+    enhanced_antihook/gadget_detector.cpp \
+    enhanced_antihook/memory_protector.cpp \
+    enhanced_antihook/anti_hook.cpp \
+    enhanced_antihook/anti_hook_manager.cpp \
+    injection.cpp \
+    security_verifier.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/Data_Folder/curl/curl-android-$(TARGET_ARCH_ABI)/include
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/Data_Folder/curl/openssl-android-$(TARGET_ARCH_ABI)/include
 
-LOCAL_CPP_FEATURES := exceptions
-LOCAL_LDLIBS := -llog -landroid -lEGL -lGLESv2 -lGLESv3 -lGLESv1_CM -lz
-LOCAL_STATIC_LIBRARIES := libcurl libssl libcrypto libdobby
-include $(BUILD_SHARED_LIBRARY)
+# Debug vs Release configuration
+ifeq ($(APP_OPTIM),debug)
+    LOCAL_CFLAGS += -DDEBUG -g -O0
+    LOCAL_CPPFLAGS += -DDEBUG_BUILD
+else
+    LOCAL_CFLAGS += -DRELEASE -Os -fomit-frame-pointer
+    LOCAL_CPPFLAGS += -DPRODUCTION_BUILD
+endif
 
+LOCAL_CPP_FEATURES := exceptions rtti
+# LOCAL_LDLIBS := -llog -landroid -lEGL -lGLESv2 -lGLESv3 -lGLESv1_CM -lz
+LOCAL_STATIC_LIBRARIES := libcurl libssl libcrypto libdobby
+
+# Linker flags for production security
+LOCAL_LDFLAGS := -Wl,--gc-sections,--strip-all,-z,relro,-z,now
+LOCAL_LDLIBS := -llog -landroid -lz -lcrypto -ldl
+
+
+include $(BUILD_SHARED_LIBRARY)
 include $(LOCAL_PATH)/BYPASS/Bypass.mk
-include $(CLEAR_VARS)
+# include $(CLEAR_VARS)

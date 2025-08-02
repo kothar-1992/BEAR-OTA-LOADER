@@ -4,7 +4,7 @@
             "outputFile": "com.bearmod.mundo.mundo_core-release-30:/values-xlarge-v4/values-xlarge-v4.xml",
             "map": [
                 {
-                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\630c194a48492eb5f7015b1d8d465673\\transformed\\appcompat-1.7.1\\res\\values-xlarge-v4\\values-xlarge-v4.xml",
+                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\f582c05fa2bd4cd437f2810eb848e46c\\transformed\\appcompat-1.7.1\\res\\values-xlarge-v4\\values-xlarge-v4.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7",
                         "startColumns": "4,4,4,4,4,4",
@@ -19,7 +19,7 @@
             "outputFile": "com.bearmod.mundo.mundo_core-mergeReleaseResources-28:/values-xlarge-v4/values-xlarge-v4.xml",
             "map": [
                 {
-                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\630c194a48492eb5f7015b1d8d465673\\transformed\\appcompat-1.7.1\\res\\values-xlarge-v4\\values-xlarge-v4.xml",
+                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\f582c05fa2bd4cd437f2810eb848e46c\\transformed\\appcompat-1.7.1\\res\\values-xlarge-v4\\values-xlarge-v4.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7",
                         "startColumns": "4,4,4,4,4,4",

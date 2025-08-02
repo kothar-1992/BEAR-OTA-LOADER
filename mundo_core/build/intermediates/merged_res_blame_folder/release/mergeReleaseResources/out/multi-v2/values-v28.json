@@ -4,7 +4,7 @@
             "outputFile": "com.bearmod.mundo.mundo_core-release-30:/values-v28/values-v28.xml",
             "map": [
                 {
-                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\9f75d3ea05d65fb7e4a29b00a6db860d\\transformed\\material-1.12.0\\res\\values-v28\\values-v28.xml",
+                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\ecdd5cf4751735c8fbe9d396274bc8da\\transformed\\material-1.12.0\\res\\values-v28\\values-v28.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -23,7 +23,7 @@
                     }
                 },
                 {
-                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\630c194a48492eb5f7015b1d8d465673\\transformed\\appcompat-1.7.1\\res\\values-v28\\values-v28.xml",
+                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\f582c05fa2bd4cd437f2810eb848e46c\\transformed\\appcompat-1.7.1\\res\\values-v28\\values-v28.xml",
                     "from": {
                         "startLines": "2,3,4,8",
                         "startColumns": "4,4,4,4",
@@ -47,7 +47,7 @@
             "outputFile": "com.bearmod.mundo.mundo_core-mergeReleaseResources-28:/values-v28/values-v28.xml",
             "map": [
                 {
-                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\9f75d3ea05d65fb7e4a29b00a6db860d\\transformed\\material-1.12.0\\res\\values-v28\\values-v28.xml",
+                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\ecdd5cf4751735c8fbe9d396274bc8da\\transformed\\material-1.12.0\\res\\values-v28\\values-v28.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -66,7 +66,7 @@
                     }
                 },
                 {
-                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\630c194a48492eb5f7015b1d8d465673\\transformed\\appcompat-1.7.1\\res\\values-v28\\values-v28.xml",
+                    "source": "D:\\AndroidBuild\\.gradle\\caches\\8.13\\transforms\\f582c05fa2bd4cd437f2810eb848e46c\\transformed\\appcompat-1.7.1\\res\\values-v28\\values-v28.xml",
                     "from": {
                         "startLines": "2,3,4,8",
                         "startColumns": "4,4,4,4",

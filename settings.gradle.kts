@@ -33,8 +33,7 @@ rootProject.name = "Bear-Loader"
 //
 // Module Dependencies:
 //   1. mundo_core: Native Runtime Container (builds first)
-//   2. Plugin: Production loader (depends on mundo_core)
-//   3. app: Development/debug app (depends on mundo_core)
+//   2. app: Development/debug app (depends on mundo_core)
 // ===================================================================
 
 // 1. mundo_core: Native Runtime Container Module
@@ -44,16 +43,7 @@ rootProject.name = "Bear-Loader"
 //    - Role: Security, injection, KeyAuth bridge APIs
 //    - Auto-copy: Distributes libmundo.so to Plugin/ and app/ modules
 include(":mundo_core")
-
-// 2. Plugin: Production Loader App Module
-//    - Type: Android application (production)
-//    - Output: Optimized APK for end users
-//    - Dependencies: Consumes libmundo.so from mundo_core
-//    - Entry Point: com.bearmod.loader.ui.MainActivity
-//    - Features: OTA updates, KeyAuth auth, secure game launching
-include(":Plugin")
-
-// 3. app: BearMod Development App Module
+// 2. app: BearMod Development App Module
 //    - Type: Android application with native components
 //    - Output: Debug APK + libbearmod.so
 //    - Dependencies: Links with libmundo.so for testing

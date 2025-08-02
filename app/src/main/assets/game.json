@@ -1,0 +1,59 @@
+{
+  "aplikasi": {
+    "G1": {
+      "id": 0,
+      "package": "com.tencent.ig",
+      "status": "Live",
+      "title": "PUBG GLOBAL",
+      "version": "3.9.0"
+    },
+    "G2": {
+      "id": 1,
+      "package": "com.pubg.krmobile",
+      "status": "Live",
+      "title": "PUBG KOREA",
+      "version": "3.9.0"
+    },
+    "G3": {
+      "id": 2,
+      "package": "com.vng.pubgmobile",
+      "status": "Live",
+      "title": "PUBG VIETNAM",
+      "version": "3.9.0"
+    },
+    "G4": {
+      "id": 3,
+      "package": "com.rekoo.pubgm",
+      "status": "Live",
+      "title": "PUBG TAIWAN",
+      "version": "3.9.0"
+    },
+    "G5": {
+      "id": 4,
+      "package": "com.pubg.imobile",
+      "status": "Live",
+      "title": "PUBG INDIA",
+      "version": "3.9.0"
+    }
+  },
+  "loader": {
+    "BGMI": {
+      "gamename": "BGMI",
+      "name": "libbgmi.so",
+      "path or fileid": " ",
+      "version": 1
+    },
+    "FARLIGHT": {
+      "gamename": "FARLIGHT",
+      "name": "libfarlight.so",
+      "path or fileid": " ",
+      "version": 1
+    },
+    "PUBGM": {
+      "gamename": "PUBGM",
+      "name": "libpubgm.so",
+      "path or fileid": " ",
+      "version": 1
+    }
+  }
+}

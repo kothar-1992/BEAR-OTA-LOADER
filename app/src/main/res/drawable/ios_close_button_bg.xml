@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Button Shadow -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#60000000" />
+        </shape>
+    </item>
+    
+    <!-- Main Button Background -->
+    <item android:left="2dp" android:top="2dp" android:right="2dp" android:bottom="4dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/accent_secondary" />
+            <stroke android:width="2dp" android:color="@color/text_primary" />
+        </shape>
+    </item>
+    
+    <!-- Highlight for 3D effect -->
+    <item android:left="2dp" android:top="2dp" android:right="2dp" android:bottom="4dp">
+        <shape android:shape="oval">
+            <gradient
+                android:startColor="#30FFFFFF"
+                android:endColor="#00FFFFFF"
+                android:angle="135" />
+        </shape>
+    </item>
+</layer-list> 

@@ -5,19 +5,19 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/animator/fragment_fade_enter.xml",
-        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-9:/animator/fragment_fade_enter.xml"
+        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-14:/animator/fragment_fade_enter.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/animator/fragment_close_exit.xml",
-        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-9:/animator/fragment_close_exit.xml"
+        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-14:/animator/fragment_close_exit.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/animator/fragment_open_enter.xml",
-        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-9:/animator/fragment_open_enter.xml"
+        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-14:/animator/fragment_open_enter.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/animator/fragment_fade_exit.xml",
-        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-9:/animator/fragment_fade_exit.xml"
+        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-14:/animator/fragment_fade_exit.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/animator/mtrl_extended_fab_state_list_animator.xml",
@@ -49,7 +49,7 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/animator/fragment_close_enter.xml",
-        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-9:/animator/fragment_close_enter.xml"
+        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-14:/animator/fragment_close_enter.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/animator/m3_extended_fab_state_list_animator.xml",
@@ -65,7 +65,7 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/animator/fragment_open_exit.xml",
-        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-9:/animator/fragment_open_exit.xml"
+        "source": "com.bearmod.mundo.mundo_core-fragment-1.5.4-14:/animator/fragment_open_exit.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/animator/m3_extended_fab_show_motion_spec.xml",

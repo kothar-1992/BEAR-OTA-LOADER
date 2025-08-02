@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#FF000000"
+    android:padding="24dp">
+
+    <!-- Simple splash with minimal styling -->
+    <LinearLayout
+        android:id="@+id/splash_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- Simple logo -->
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:src="@drawable/icon"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Simple progress -->
+        <ProgressBar
+            android:id="@+id/logo_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+        <!-- App title -->
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BEARMOD"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Status text -->
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="loading"
+            android:textColor="#00FF00"
+            android:textSize="14sp"
+            android:layout_marginBottom="32dp" />
+
+    </LinearLayout>
+
+    <!-- Main app layout -->
+    <LinearLayout
+        android:id="@+id/main_app_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <!-- Welcome text -->
+        <TextView
+            android:id="@+id/welcome_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="bearmod_is_running"
+            android:textColor="#00FF00"
+            android:textSize="18sp"
+            android:layout_marginBottom="32dp"
+            android:gravity="center" />
+
+        <!-- Simple buttons with basic backgrounds -->
+        <Button
+            android:id="@+id/settings_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="show_menu"
+            android:textColor="#FFFFFF"
+            android:background="#FF333333"
+            android:layout_marginBottom="16dp"
+            android:padding="16dp" />
+
+        <Button
+            android:id="@+id/about_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="about"
+            android:textColor="#FFFFFF"
+            android:background="#FF444444"
+            android:layout_marginBottom="16dp"
+            android:padding="16dp" />
+
+        <Button
+            android:id="@+id/exit_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="exit"
+            android:textColor="#FFFFFF"
+            android:background="#FF555555"
+            android:padding="16dp" />
+
+    </LinearLayout>
+
+</LinearLayout> 

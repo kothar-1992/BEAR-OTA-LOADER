@@ -33,33 +33,47 @@ namespace Mundo {
             }
 
             try {
-                // Get BearTokenManager instance
-                jclass bearTokenManagerClass = s_env->FindClass("com/bearmod/loader/auth/BearTokenManager");
-                if (!bearTokenManagerClass) {
-                    LOGE("Failed to find BearTokenManager class");
+                // Use existing SimpleLicenseVerifier for authentication
+                jclass simpleLicenseVerifierClass = s_env->FindClass("com/bearmod/auth/SimpleLicenseVerifier");
+                if (!simpleLicenseVerifierClass) {
+                    LOGE("Failed to find SimpleLicenseVerifier class");
                     return false;
                 }
 
-                // Get getInstance method
-                jmethodID getInstanceMethod = s_env->GetStaticMethodID(bearTokenManagerClass,
-                    "getInstance", "(Landroid/content/Context;)Lcom/bearmod/loader/auth/BearTokenManager;");
-                if (!getInstanceMethod) {
-                    LOGE("Failed to find BearTokenManager.getInstance method");
+                // Get quickLicenseCheck method (synchronous)
+                jmethodID quickLicenseCheckMethod = s_env->GetStaticMethodID(simpleLicenseVerifierClass,
+                    "quickLicenseCheck", "(Landroid/content/Context;Ljava/lang/String;)Z");
+                if (!quickLicenseCheckMethod) {
+                    LOGE("Failed to find SimpleLicenseVerifier.quickLicenseCheck method");
                     return false;
                 }
 
-                // Get BearTokenManager instance
-                jobject bearTokenManager = s_env->CallStaticObjectMethod(bearTokenManagerClass,
-                    getInstanceMethod, s_context);
-                if (!bearTokenManager) {
-                    LOGE("Failed to get BearTokenManager instance");
+                // Convert bearToken to jstring
+                jstring jBearToken = s_env->NewStringUTF(bearToken.c_str());
+                if (!jBearToken) {
+                    LOGE("Failed to create jstring for bearToken");
                     return false;
                 }
 
-                // For simplicity, just return true if we can get the BearTokenManager
-                // In a real implementation, you would validate the actual token
-                LOGI("BearToken validation successful via bridge");
-                return true;
+                // Call quickLicenseCheck method
+                jboolean result = s_env->CallStaticBooleanMethod(simpleLicenseVerifierClass,
+                    quickLicenseCheckMethod, s_context, jBearToken);
+
+                // Clean up local references
+                s_env->DeleteLocalRef(jBearToken);
+                s_env->DeleteLocalRef(simpleLicenseVerifierClass);
+
+                // Check for JNI exceptions
+                if (s_env->ExceptionCheck()) {
+                    s_env->ExceptionDescribe();
+                    s_env->ExceptionClear();
+                    LOGE("JNI exception during license verification");
+                    return false;
+                }
+
+                bool authResult = (result == JNI_TRUE);
+                LOGI("BearToken validation via SimpleLicenseVerifier: %s", authResult ? "SUCCESS" : "FAILED");
+                return authResult;
 
             } catch (...) {
                 LOGE("Exception during KeyAuth bridge authentication");
@@ -82,17 +96,47 @@ namespace Mundo {
             }
 
             try {
-                // For simplicity, perform basic validation (length check + format)
-                bool basicValidation = (licenseKey.length() >= 10 &&
-                                      licenseKey.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_") == std::string::npos);
-
-                if (basicValidation) {
-                    LOGI("License key format validation passed");
-                    return true;
-                } else {
-                    LOGE("License key format validation failed");
+                // Use existing SimpleLicenseVerifier for license key authentication
+                jclass simpleLicenseVerifierClass = s_env->FindClass("com/bearmod/auth/SimpleLicenseVerifier");
+                if (!simpleLicenseVerifierClass) {
+                    LOGE("Failed to find SimpleLicenseVerifier class");
                     return false;
                 }
+
+                // Get quickLicenseCheck method (synchronous)
+                jmethodID quickLicenseCheckMethod = s_env->GetStaticMethodID(simpleLicenseVerifierClass,
+                    "quickLicenseCheck", "(Landroid/content/Context;Ljava/lang/String;)Z");
+                if (!quickLicenseCheckMethod) {
+                    LOGE("Failed to find SimpleLicenseVerifier.quickLicenseCheck method");
+                    return false;
+                }
+
+                // Convert licenseKey to jstring
+                jstring jLicenseKey = s_env->NewStringUTF(licenseKey.c_str());
+                if (!jLicenseKey) {
+                    LOGE("Failed to create jstring for licenseKey");
+                    return false;
+                }
+
+                // Call quickLicenseCheck method
+                jboolean result = s_env->CallStaticBooleanMethod(simpleLicenseVerifierClass,
+                    quickLicenseCheckMethod, s_context, jLicenseKey);
+
+                // Clean up local references
+                s_env->DeleteLocalRef(jLicenseKey);
+                s_env->DeleteLocalRef(simpleLicenseVerifierClass);
+
+                // Check for JNI exceptions
+                if (s_env->ExceptionCheck()) {
+                    s_env->ExceptionDescribe();
+                    s_env->ExceptionClear();
+                    LOGE("JNI exception during license verification");
+                    return false;
+                }
+
+                bool authResult = (result == JNI_TRUE);
+                LOGI("License key validation via SimpleLicenseVerifier: %s", authResult ? "SUCCESS" : "FAILED");
+                return authResult;
 
             } catch (...) {
                 LOGE("Exception during license key authentication");

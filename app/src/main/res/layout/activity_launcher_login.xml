@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/login_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bearmod_login_background"
+    android:padding="32dp">
+
+    <!-- Main Content Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- Circular Logo Container -->
+        <FrameLayout
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_marginBottom="32dp">
+
+            <!-- Circular Background -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bearmod_logo_circle" />
+
+            <!-- Bear Logo -->
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:src="@drawable/icon"
+                android:scaleType="centerInside" />
+        </FrameLayout>
+
+        <!-- App Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BEAR-MOD"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="48dp"
+            tools:ignore="HardcodedText" />
+
+        <!-- License Key Input Container -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp">
+
+            <EditText
+                android:id="@+id/edit_license_key"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:autofillHints=""
+                android:hint="Enter license key"
+                android:inputType="text"
+                android:paddingStart="20dp"
+                android:paddingEnd="60dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#888888"
+                android:background="@drawable/bearmod_input_background"
+                android:imeOptions="actionDone"
+                android:textSize="16sp"
+                tools:ignore="HardcodedText,VisualLintTextFieldSize" />
+
+            <!-- Copy/Paste Button -->
+            <ImageButton
+                android:id="@+id/button_copy_paste"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bearmod_copy_button"
+                android:contentDescription="@string/copy_paste_license_key"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_copy_paste"
+                tools:ignore="TouchTargetSizeCheck" />
+        </RelativeLayout>
+
+        <!-- Checkbox Options -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="32dp">
+
+            <!-- Remember Key Checkbox -->
+            <CheckBox
+                android:id="@+id/checkbox_remember_key"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remember Key"
+                android:textColor="#CCCCCC"
+                android:textSize="16sp"
+                android:layout_marginBottom="12dp"
+                android:button="@drawable/bearmod_checkbox_selector"
+                android:paddingStart="8dp"
+                tools:ignore="HardcodedText,RtlSymmetry" />
+
+            <!-- Automatic Login Checkbox -->
+            <CheckBox
+                android:id="@+id/checkbox_auto_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Automatic login"
+                android:textColor="#CCCCCC"
+                android:textSize="16sp"
+                android:button="@drawable/bearmod_checkbox_selector"
+                android:paddingStart="8dp"
+                tools:ignore="HardcodedText,RtlSymmetry" />
+        </LinearLayout>
+
+        <!-- Login Button -->
+        <Button
+            android:id="@+id/button_login"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Login"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bearmod_login_button"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:elevation="8dp"
+            tools:ignore="HardcodedText,VisualLintButtonSize" />
+
+        <!-- Status Text -->
+        <TextView
+            android:id="@+id/status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Verifying..."
+            android:textColor="#4CAF50"
+            android:textSize="14sp"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            tools:ignore="HardcodedText" />
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateTint="#4CAF50"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+    <!-- Version Text -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:text="1.0.6"
+        android:textColor="#78909C"
+        android:textSize="14sp"
+        tools:ignore="HardcodedText" />
+
+</RelativeLayout>

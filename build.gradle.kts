@@ -31,7 +31,6 @@ tasks.register("cleanBearMod") {
         // Clean build directories
         delete(fileTree("app/build"))
         delete(fileTree("mundo_core/build"))
-        delete(fileTree("native-lib/build"))
 
         // Clean temporary files
         delete(fileTree("script/payloads") { include("*.tmp") })
@@ -58,7 +57,6 @@ tasks.register("buildBearModLibraries") {
     description = "Build all BearMod native libraries and components"
 
     dependsOn(":mundo_core:assembleRelease")
-    dependsOn(":native-lib:assembleRelease")
     dependsOn(":app:assembleRelease")
 
     doLast {
@@ -78,7 +76,7 @@ tasks.register("buildBearModLibraries") {
         // Copy native libraries
         copy {
             from("mundo_core/build/intermediates/cmake/release/obj")
-            into("$deployDir/native")
+            into("$deployDir/app")
             include("**/*.so")
         }
 

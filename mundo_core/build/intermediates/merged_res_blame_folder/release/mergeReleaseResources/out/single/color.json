@@ -33,11 +33,11 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/abc_background_cache_hint_selector_material_dark.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/abc_background_cache_hint_selector_material_dark.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/abc_background_cache_hint_selector_material_dark.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/abc_primary_text_material_light.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/abc_primary_text_material_light.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/abc_primary_text_material_light.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/material_slider_halo_color.xml",
@@ -77,7 +77,7 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/abc_secondary_text_material_dark.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/abc_secondary_text_material_dark.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/abc_secondary_text_material_dark.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/m3_navigation_item_ripple_color.xml",
@@ -85,7 +85,7 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/abc_hint_foreground_material_dark.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/abc_hint_foreground_material_dark.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/abc_hint_foreground_material_dark.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/mtrl_fab_bg_color_selector.xml",
@@ -113,11 +113,11 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/abc_primary_text_material_dark.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/abc_primary_text_material_dark.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/abc_primary_text_material_dark.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/abc_primary_text_disable_only_material_dark.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/abc_primary_text_disable_only_material_dark.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/abc_primary_text_disable_only_material_dark.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/mtrl_calendar_item_stroke_color.xml",
@@ -157,7 +157,7 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/switch_thumb_material_dark.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/switch_thumb_material_dark.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/switch_thumb_material_dark.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/mtrl_tabs_colored_ripple_color.xml",
@@ -173,7 +173,7 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/abc_primary_text_disable_only_material_light.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/abc_primary_text_disable_only_material_light.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/abc_primary_text_disable_only_material_light.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/mtrl_on_primary_text_btn_text_color_selector.xml",
@@ -221,7 +221,7 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/switch_thumb_material_light.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/switch_thumb_material_light.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/switch_thumb_material_light.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/m3_slider_thumb_color_legacy.xml",
@@ -377,7 +377,7 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/abc_secondary_text_material_light.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/abc_secondary_text_material_light.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/abc_secondary_text_material_light.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/material_on_surface_stroke.xml",
@@ -437,7 +437,7 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/abc_search_url_text.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/abc_search_url_text.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/abc_search_url_text.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/material_timepicker_button_background.xml",
@@ -685,11 +685,11 @@
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/abc_background_cache_hint_selector_material_light.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/abc_background_cache_hint_selector_material_light.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/abc_background_cache_hint_selector_material_light.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/abc_hint_foreground_material_light.xml",
-        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-13:/color/abc_hint_foreground_material_light.xml"
+        "source": "com.bearmod.mundo.mundo_core-appcompat-1.7.1-23:/color/abc_hint_foreground_material_light.xml"
     },
     {
         "merged": "com.bearmod.mundo.mundo_core-release-30:/color/m3_default_color_primary_text.xml",

@@ -25,6 +25,6 @@
       type="INSTRUMENTATION_TEST"
       applicationId="com.bearmod.mundo.test"
       generatedResourceFolders="build\generated\res\resValues\androidTest\debug"
-      desugaredMethodsFiles="D:\AndroidBuild\.gradle\caches\8.13\transforms\896abe55b2e3e731614908951798e80d\transformed\D8BackportedDesugaredMethods.txt">
+      desugaredMethodsFiles="D:\AndroidBuild\.gradle\caches\8.13\transforms\220d8090a7f768e65c930b8776a4f68b\transformed\D8BackportedDesugaredMethods.txt">
   </artifact>
 </variant>
