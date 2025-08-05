@@ -22,10 +22,14 @@ public class InjectionManager {
     private final Context context;
     private final Executor executor;
     private boolean isInjectionActive = false;
+
+    // Shared native library manager
+    private final NativeLibraryManager nativeLibraryManager;
     
     private InjectionManager(Context context) {
         this.context = context.getApplicationContext();
         this.executor = Executors.newSingleThreadExecutor();
+        this.nativeLibraryManager = NativeLibraryManager.getInstance();
     }
     
     public static InjectionManager getInstance(Context context) {
@@ -195,32 +199,17 @@ public class InjectionManager {
     }
     
     /**
-     * Check if native library is loaded
+     * Check if native library is loaded (FIXED - now uses shared manager)
      */
     private boolean isNativeLibraryLoaded() {
-        try {
-            // Try to call a native method to check if library is loaded
-            return nativeIsLibraryLoaded();
-        } catch (UnsatisfiedLinkError e) {
-            return false;
-        } catch (Exception e) {
-            Log.e(TAG, "Error checking native library status", e);
-            return false;
-        }
+        return nativeLibraryManager.isLibraryLoaded();
     }
     
     /**
-     * Get native library path
+     * Get native library path (FIXED - now uses shared manager)
      */
     private String getNativeLibraryPath() {
-        try {
-            return nativeGetLibraryPath();
-        } catch (UnsatisfiedLinkError e) {
-            return null;
-        } catch (Exception e) {
-            Log.e(TAG, "Error getting native library path", e);
-            return null;
-        }
+        return nativeLibraryManager.getLibraryPath();
     }
     
     /**
@@ -355,8 +344,14 @@ public class InjectionManager {
             // Use ptrace or similar methods for process injection
             Log.d(TAG, "Attempting process injection...");
             
-            // This would require more advanced implementation
-            // For now, return false to indicate not implemented
+            // Check if target package is running
+            if (!isPackageRunning(targetPackage)) {
+                Log.d(TAG, "Target package not running: " + targetPackage);
+                return false;
+            }
+
+            // Process injection not yet fully implemented
+            Log.d(TAG, "Process injection not yet fully implemented");
             return false;
             
         } catch (Exception e) {
@@ -439,14 +434,10 @@ public class InjectionManager {
     private native boolean nativeInjectLibrary(String targetPackage, String libraryPath);
     private native void nativeCleanupInjection();
     
-    // Static block to load native library
+
+
+    // Static block removed - library loading now handled by NativeLibraryManager
     static {
-        try {
-            System.loadLibrary("BearMod");
-            System.loadLibrary("BEAR");
-            Log.d(TAG, "Native library loaded for injection");
-        } catch (UnsatisfiedLinkError e) {
-            Log.w(TAG, "Native library not available for injection: " + e.getMessage());
-        }
+        Log.d(TAG, "InjectionManager class loaded - native library loading handled by NativeLibraryManager");
     }
 }

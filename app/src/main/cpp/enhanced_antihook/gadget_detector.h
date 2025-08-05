@@ -10,7 +10,7 @@
 #include <chrono>
 #include <unordered_set>
 
-namespace BearLoader {
+namespace BearMod::EnhancedAntiHook {
     namespace EnhancedAntiHook {
         
         /**
@@ -179,6 +179,6 @@ namespace BearLoader {
         }
         
     } // namespace EnhancedAntiHook
-} // namespace BearLoader
+} // namespace BearMod
 
 #endif // BEARMOD_GADGET_DETECTOR_H

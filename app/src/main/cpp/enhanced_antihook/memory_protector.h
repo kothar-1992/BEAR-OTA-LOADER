@@ -12,7 +12,7 @@
 #include <cstdint>
 #include "Memory_Protector.h"
 
-    namespace BearLoader::EnhancedAntiHook {
+    namespace BearMod::EnhancedAntiHook {
         
         /**
          * Advanced Memory Protection System
@@ -227,7 +227,7 @@
             MemoryProtector::ProtectionType getRecommendedProtection(uintptr_t address);
         }
         
-    } // namespace BearLoader::EnhancedAntiHook
+    } // namespace BearMod::EnhancedAntiHook
 
 
 #endif // BEARMOD_MEMORY_PROTECTOR_H

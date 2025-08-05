@@ -13,7 +13,7 @@
 #include "anti_detection_manager.h"
 
 
-    namespace BearLoader::NonRoot {
+    namespace BearMod::NonRoot {
         
         /**
          * Secure Frida Gadget Manager for Non-Root Injection
@@ -91,7 +91,7 @@
             // Security components
             std::unique_ptr<class GadgetObfuscator> m_obfuscator;
             std::unique_ptr<class AntiDetectionManager> m_antiDetection;
-            std::unique_ptr<BearLoader::EnhancedAntiHook::MemoryProtector> m_memoryProtector;
+            std::unique_ptr<BearMod::EnhancedAntiHook::MemoryProtector> m_memoryProtector;
             
             // Internal methods
             bool validateTargetAPK(const std::string& apkPath);  // Changed from static to instance method
@@ -211,7 +211,7 @@
             );
         };
         
-    } // namespace BearLoader::NonRoot
+    } // namespace BearMod::NonRoot
 
 
 #endif // BEARMOD_FRIDA_GADGET_MANAGER_H

@@ -8,7 +8,7 @@
 #include <random>
 #include <algorithm>
 
-namespace BearLoader {
+namespace BearMod {
     namespace NonRoot {
         
         /**
@@ -114,6 +114,6 @@ namespace BearLoader {
         }
         
     } // namespace NonRoot
-} // namespace BearLoader
+} // namespace BearMod
 
 #endif // BEARMOD_GADGET_OBFUSCATOR_H

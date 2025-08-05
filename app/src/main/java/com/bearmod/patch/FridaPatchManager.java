@@ -235,14 +235,15 @@ public class FridaPatchManager {
                     }
 
                     @Override
-                    public void onDownloadProgress(int progress) {
+                    public void onDownloadProgress(String fileName, int progress) {
                         // Map download progress to patch progress (40-80%)
                         int patchProgress = 40 + (progress * 40 / 100);
                         callback.onPatchProgress(patchProgress);
                     }
 
                     @Override
-                    public void onDownloadComplete(File downloadedFile) {
+                    public void onDownloadComplete(String fileName, String filePath) {
+                        File downloadedFile = new File(filePath);
                         try {
                             callback.onPatchProgress(85);
 
@@ -268,8 +269,8 @@ public class FridaPatchManager {
                     }
 
                     @Override
-                    public void onDownloadFailed(String error) {
-                        callback.onPatchFailed("Download failed: " + error);
+                    public void onDownloadFailed(String fileName, String error) {
+                        callback.onPatchFailed("Download failed for " + fileName + ": " + error);
                     }
                 });
 
@@ -390,7 +391,7 @@ public class FridaPatchManager {
                         }
 
                         @Override
-                        public void onDownloadProgress(int progress) {
+                        public void onDownloadProgress(String fileName, int progress) {
                             // Update overall progress
                             int baseProgress = 10 + (completedLibraries[0] * 80 / totalLibraries);
                             int libraryProgress = progress * 80 / (totalLibraries * 100);
@@ -398,7 +399,8 @@ public class FridaPatchManager {
                         }
 
                         @Override
-                        public void onDownloadComplete(File downloadedFile) {
+                        public void onDownloadComplete(String fileName, String filePath) {
+                            File downloadedFile = new File(filePath);
                             Log.d(TAG, "Download completed: " + libraryName);
                             synchronized (downloadComplete) {
                                 downloadComplete[0] = true;
@@ -407,8 +409,8 @@ public class FridaPatchManager {
                         }
 
                         @Override
-                        public void onDownloadFailed(String error) {
-                            Log.e(TAG, "Download failed for " + libraryName + ": " + error);
+                        public void onDownloadFailed(String fileName, String error) {
+                            Log.e(TAG, "Download failed for " + fileName + ": " + error);
                             synchronized (downloadComplete) {
                                 downloadError[0] = error;
                                 downloadComplete[0] = true;

@@ -43,7 +43,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.activity.OnBackPressedCallback;
 
-import com.bearmod.ota.SecureOTAIntegration;
+import com.bearmod.ota.OTAUpdateManager;
 
 /**
  * MainActivity - Main App Activity for BearMod
@@ -417,7 +417,6 @@ public class MainActivity extends AppCompatActivity {
             optionDefault.setSelected(true);
         }
     }
-
     private void selectOption(Button selectedButton, Button otherButton, String optionName) {
         selectedButton.setSelected(true);
         if (otherButton != null) {
@@ -1416,23 +1415,23 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Check for OTA updates before initializing injection system
-     * Updated to use consolidated SecureOTAIntegration
+     * Updated to use consolidated OTAUpdateManager
      */
     private void checkOTAUpdates() {
         try {
             Log.d(TAG, "Checking for simplified OTA updates...");
 
-            SecureOTAIntegration secureOTA = new SecureOTAIntegration(this);
+            OTAUpdateManager otaManager = OTAUpdateManager.getInstance(this);
 
-            // Perform secure OTA update with progress tracking
-            secureOTA.performSecureOTAUpdate("com.tencent.ig", new com.bearmod.ota.OTAUpdateManager.OTAUpdateCallback() {
+            // Perform simplified OTA update with progress tracking
+            otaManager.checkAndPerformSimplifiedUpdates("com.tencent.ig", new OTAUpdateManager.OTAUpdateCallback() {
                 @Override
                 public void onUpdateCheckStarted() {
-                    runOnUiThread(() -> status.setText("Checking for library updates..."));
+                    runOnUiThread(() -> status.setText("Checking for library updates"));
                 }
 
                 @Override
-                public void onUpdateCheckComplete(java.util.Map<String, com.bearmod.ota.OTAUpdateManager.LibraryConfig> updatesNeeded) {
+                public void onUpdateCheckComplete(java.util.Map<String, OTAUpdateManager.LibraryConfig> updatesNeeded) {
                     runOnUiThread(() -> {
                         if (updatesNeeded.isEmpty()) {
                             status.setText("All libraries up to date");
@@ -1443,15 +1442,15 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onUpdateProgress(String message, int progress) {
-                    runOnUiThread(() -> status.setText(message + " (" + progress + "%)"));
+                public void onUpdateProgress(String libraryName, int progress) {
+                    runOnUiThread(() -> status.setText(libraryName + " (" + progress + "%)"));
                 }
 
                 @Override
-                public void onUpdateComplete(String message) {
+                public void onUpdateComplete(String libraryName, boolean success) {
                     runOnUiThread(() -> {
-                        Log.d(TAG, "OTA update completed successfully: " + message);
-                        status.setText("Libraries updated successfully");
+                        Log.d(TAG, "OTA update completed: " + libraryName + " = " + success);
+                        status.setText("Library " + libraryName + (success ? " updated" : " failed"));
                     });
                 }
 
@@ -1464,15 +1463,14 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onAllUpdatesComplete(boolean success) {
+                public void onAllUpdatesComplete(boolean allSuccessful) {
                     runOnUiThread(() -> {
-                        if (success) {
-                            status.setText("All updates completed successfully");
-                        } else {
-                            status.setText("Some updates failed - using fallback");
-                        }
+                        Log.d(TAG, "All OTA updates completed: " + allSuccessful);
+                        status.setText(allSuccessful ? "All libraries updated successfully" : "Some library updates failed");
                     });
                 }
+
+
             });
 
         } catch (Exception e) {

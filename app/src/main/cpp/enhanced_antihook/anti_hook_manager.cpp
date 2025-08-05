@@ -13,7 +13,7 @@
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-namespace BearLoader {
+namespace BearMod::AntiHook {
     namespace AntiHook {
         
         // Frida detection signatures
@@ -270,23 +270,23 @@ namespace BearLoader {
 
 // JNI exports
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_bearmod_loader_security_NativeSecurityManager_nativeDetectFrida(
+Java_com_bearmod_security_NativeSecurityManager_nativeDetectFrida(
         JNIEnv* env, jobject thiz) {
-    return !BearLoader::AntiHook::performAntiHookingCheck();
+    return !BearMod::AntiHook::performAntiHookingCheck();
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_bearmod_loader_security_NativeSecurityManager_nativeStartAntiHookMonitoring(
+Java_com_bearmod_security_NativeSecurityManager_nativeStartAntiHookMonitoring(
         JNIEnv* env, jobject thiz) {
-    BearLoader::AntiHook::startContinuousMonitoring();
+    BearMod::AntiHook::startContinuousMonitoring();
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_bearmod_loader_security_NativeSecurityManager_nativeVerifyIntegrity(
+Java_com_bearmod_security_NativeSecurityManager_nativeVerifyIntegrity(
         JNIEnv* env, jobject thiz, jobject context) {
     
     // Perform anti-hooking check first
-    if (!BearLoader::AntiHook::performAntiHookingCheck()) {
+    if (!BearMod::AntiHook::performAntiHookingCheck()) {
         LOGE("Integrity check failed - hooking detected");
         return JNI_FALSE;
     }

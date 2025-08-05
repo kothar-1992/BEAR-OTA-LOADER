@@ -1,5 +1,5 @@
 #include "gadget_detector.h"
-#include "../Helper/Includes.h"
+#include "../Data_Folder/Helper/Includes.h"
 #include <fstream>
 #include <sstream>
 #include <thread>
@@ -16,7 +16,7 @@
 #define LOG_TAG "GadgetDetector"
 
 
-    namespace BearLoader::EnhancedAntiHook {
+    namespace BearMod::EnhancedAntiHook {
         
         // Static member definitions
         std::unique_ptr<GadgetDetector> GadgetDetectorManager::s_instance = nullptr;
@@ -476,5 +476,5 @@
             return result.detected;
         }
         
-    } // namespace BearLoader::EnhancedAntiHook
+    } // namespace BearMod::EnhancedAntiHook
 

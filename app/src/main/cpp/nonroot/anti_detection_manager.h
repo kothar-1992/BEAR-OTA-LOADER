@@ -13,7 +13,7 @@
 #include <thread>
 #include <jni.h>
 
-namespace BearLoader::NonRoot {
+namespace BearMod::NonRoot {
     
     /**
      * Advanced Anti-Detection Manager for Non-Root Frida Gadget Injection
@@ -250,6 +250,6 @@ namespace BearLoader::NonRoot {
         bool shouldExitOnThreat(int level);
     }
     
-} // namespace BearLoader::NonRoot
+} // namespace BearMod::NonRoot
 
 #endif // BEARMOD_ANTI_DETECTION_MANAGER_H

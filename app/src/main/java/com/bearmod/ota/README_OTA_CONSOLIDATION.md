@@ -11,17 +11,17 @@ This document describes the consolidated OTA (Over-The-Air) system that fixes th
 ## Final Architecture
 
 ### Core Files (KEPT)
-1. **OTAUpdateManager.java** - Foundation class with KeyAuth integration and JSON parsing
-2. **SimplifiedOTAManager.java** - Core implementation with consistent library approach
-3. **SecureOTADownloader.java** - Secure download/extraction (updated for simplified approach)
-4. **SecureOTAIntegration.java** - Consolidated integration layer
-5. **SecureOTAUsageExample.java** - Usage examples (cleaned up)
-6. **ota_config.json** - Simplified configuration structure
+1. **OTAUpdateManager.java** - Enhanced consolidated class with all functionality
+2. **SimpleLicenseVerifier.java** - KeyAuth interface (unchanged)
+3. **ota_config.json** - Simplified configuration structure
 
-### Files Removed
-1. **EnhancedOTAManager.java** - Complex multi-variant approach (REMOVED)
-2. **OTAIntegrationService.java** - Redundant integration layer (REMOVED)
-3. **AssetManifestIntegrator.java** - Unused asset integration (REMOVED)
+### Files Removed (CONSOLIDATED INTO OTAUpdateManager.java)
+1. **SimplifiedOTAManager.java** - Core library configs merged into OTAUpdateManager
+2. **SecureOTADownloader.java** - Download/extraction logic merged into OTAUpdateManager
+3. **SecureOTAIntegration.java** - Coordination logic merged into OTAUpdateManager
+4. **SecureOTAUsageExample.java** - Demo code removed (moved to documentation)
+5. **LibraryManager.java** - Duplicate functionality removed
+6. **LibraryVersionManager.java** - Version management merged into OTAUpdateManager
 
 ## Key Improvements
 
@@ -84,15 +84,14 @@ Only the target installation names vary:
 
 ### Basic OTA Update
 ```java
-SecureOTAIntegration secureOTA = new SecureOTAIntegration(context);
-secureOTA.performSecureOTAUpdate("com.tencent.ig", callback);
+OTAUpdateManager otaManager = OTAUpdateManager.getInstance(context);
+otaManager.checkAndPerformUpdates(callback);
 ```
 
 ### Simplified Library Download
 ```java
-SimplifiedOTAManager simplifiedManager = new SimplifiedOTAManager(context);
-List<SimplifiedLibraryConfig> libraries = 
-    simplifiedManager.getRequiredLibrariesForPackage("com.tencent.ig");
+OTAUpdateManager otaManager = OTAUpdateManager.getInstance(context);
+otaManager.checkAndPerformSimplifiedUpdates("com.tencent.ig", callback);
 ```
 
 ## Benefits

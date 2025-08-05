@@ -12,7 +12,7 @@
 #include "objection_patcher.h"
 
 
-    namespace BearLoader::NonRoot {
+    namespace BearMod::NonRoot {
         
         /**
          * Non-Root Injection Coordinator
@@ -238,7 +238,7 @@
             std::vector<NonRootInjector::InjectionStage> getWorkflowStages();
         }
         
-    } // namespace BearLoader::NonRoot
+    } // namespace BearMod::NonRoot
 
 
 #endif // BEARMOD_NONROOT_INJECTOR_H

@@ -1,5 +1,5 @@
 #include "memory_protector.h"
-#include "../Helper/Includes.h"
+#include "../Data_Folder/Helper/Includes.h"
 #include <sys/mman.h>
 #include <unistd.h>
 #include <dlfcn.h>
@@ -13,8 +13,7 @@
 #undef LOG_TAG
 #define LOG_TAG "MemoryProtector"
 
-namespace BearLoader {
-    namespace EnhancedAntiHook {
+namespace BearMod::EnhancedAntiHook {
         
         // Static member definitions
         std::unique_ptr<MemoryProtector> MemoryProtectorManager::s_instance = nullptr;
@@ -510,4 +509,4 @@ namespace BearLoader {
         }
         
     } // namespace EnhancedAntiHook
-} // namespace BearLoader
+} // namespace BearMod

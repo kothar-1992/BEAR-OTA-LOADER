@@ -54,7 +54,7 @@
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 
 
-    namespace BearLoader::NonRoot {
+    namespace BearMod::NonRoot {
         
         // Static members
         std::unique_ptr<NonRootInjector> NonRootInjectorManager::s_instance = nullptr;
@@ -1222,5 +1222,5 @@
             return "// Generated injection script\nconsole.log('Injection script loaded');";
         }
 
-    } // namespace BearLoader::NonRoot
+    } // namespace BearMod::NonRoot
 

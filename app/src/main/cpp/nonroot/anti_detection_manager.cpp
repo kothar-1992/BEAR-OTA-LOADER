@@ -15,7 +15,7 @@
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-namespace BearLoader::NonRoot {
+namespace BearMod::NonRoot {
     
     // Static instance management
     std::unique_ptr<AntiDetectionManager> AntiDetectionManagerInstance::s_instance = nullptr;
@@ -1027,4 +1027,4 @@ namespace BearLoader::NonRoot {
         return HOOK_LIBRARIES;
     }
 
-} // namespace BearLoader::NonRoot
+} // namespace BearMod::NonRoot

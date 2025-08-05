@@ -23,7 +23,7 @@
 
 
 
-namespace BearLoader::NonRoot {
+namespace BearMod::NonRoot {
         
         // Static member definitions
         std::unique_ptr<FridaGadgetManager> GadgetManagerInstance::s_instance = nullptr;
@@ -1344,7 +1344,7 @@ namespace BearLoader::NonRoot {
 
         bool FridaGadgetManager::loadScript(const std::string &scriptPath) {
             try {
-                LOGI("Loading script: %s", scriptPath.c_str());
+                LOGI("BearMod script: %s", scriptPath.c_str());
 
                 // Check if script file exists
                 struct stat buffer;
@@ -1708,8 +1708,8 @@ extern "C" {
             BearLoader::NonRoot::FridaGadgetManager::GadgetConfig config;
             config.keyAuthToken = std::string(keyAuthStr);
             config.bearToken = std::string(bearTokenStr);
-            config.mode = BearLoader::NonRoot::FridaGadgetManager::InjectionMode::STEALTH;
-            config.security = BearLoader::NonRoot::FridaGadgetManager::SecurityLevel::MAXIMUM;
+            config.mode = BearMod::NonRoot::FridaGadgetManager::InjectionMode::STEALTH;
+            config.security = BearMod::NonRoot::FridaGadgetManager::SecurityLevel::MAXIMUM;
             config.enableAntiDetection = true;
             config.enableMemoryProtection = true;
             config.enableGadgetDetection = true;
@@ -1717,7 +1717,7 @@ extern "C" {
             config.validateEnvironment = true;
 
             // Create and initialize gadget manager instance
-            bool result = BearLoader::NonRoot::GadgetManagerInstance::createInstance(env, thiz, config);
+            bool result = BearMod::NonRoot::GadgetManagerInstance::createInstance(env, thiz, config);
 
             // Release Java strings
             env->ReleaseStringUTFChars(keyAuthToken, keyAuthStr);
@@ -1735,7 +1735,7 @@ extern "C" {
     Java_com_bearmod_plugin_NonRootManager_injectToPackage(JNIEnv *env, jobject thiz,
                                                            jstring packageName) {
         try {
-            auto* manager = BearLoader::NonRoot::GadgetManagerInstance::getInstance();
+            auto* manager = BearMod::NonRoot::GadgetManagerInstance::getInstance();
             if (!manager) {
                 return JNI_FALSE;
             }
@@ -1761,7 +1761,7 @@ extern "C" {
     JNIEXPORT jstring JNICALL
     Java_com_bearmod_plugin_NonRootManager_getInjectionStatusNative(JNIEnv *env, jobject thiz) {
         try {
-            auto* manager = BearLoader::NonRoot::GadgetManagerInstance::getInstance();
+            auto* manager = BearMod::NonRoot::GadgetManagerInstance::getInstance();
             if (!manager) {
                 return env->NewStringUTF("Manager not initialized");
             }
@@ -1794,7 +1794,7 @@ extern "C" {
     JNIEXPORT jstring JNICALL
     Java_com_bearmod_plugin_NonRootManager_getLastErrorNative(JNIEnv *env, jobject thiz) {
         try {
-            auto* manager = BearLoader::NonRoot::GadgetManagerInstance::getInstance();
+            auto* manager = BearMod::NonRoot::GadgetManagerInstance::getInstance();
             if (!manager) {
                 return env->NewStringUTF("Manager not initialized");
             }
@@ -1810,7 +1810,7 @@ extern "C" {
     JNIEXPORT void JNICALL
     Java_com_bearmod_plugin_NonRootManager_shutdownGadgetManager(JNIEnv *env, jobject thiz) {
         try {
-            BearLoader::NonRoot::GadgetManagerInstance::destroyInstance();
+            BearMod::NonRoot::GadgetManagerInstance::destroyInstance();
         } catch (const std::exception& e) {
             // Log error if logging is available
         }
@@ -1819,7 +1819,7 @@ extern "C" {
     JNIEXPORT jboolean JNICALL
     Java_com_bearmod_plugin_NonRootManager_isNonRootSupportedNative(JNIEnv *env, jclass clazz) {
         try {
-            return BearLoader::NonRoot::FridaGadgetManager::isNonRootDevice() ? JNI_TRUE : JNI_FALSE;
+            return BearMod::NonRoot::FridaGadgetManager::isNonRootDevice() ? JNI_TRUE : JNI_FALSE;
         } catch (const std::exception& e) {
             return JNI_FALSE;
         }
@@ -1829,12 +1829,12 @@ extern "C" {
     Java_com_bearmod_plugin_NonRootManager_validateSystemRequirementsNative(JNIEnv *env, jclass clazz) {
         try {
             // Check Frida Gadget compatibility
-            if (!BearLoader::NonRoot::FridaGadgetManager::checkFridaGadgetCompatibility()) {
+            if (!BearMod::NonRoot::FridaGadgetManager::checkFridaGadgetCompatibility()) {
                 return JNI_FALSE;
             }
 
             // Check if running on non-root device
-            if (!BearLoader::NonRoot::FridaGadgetManager::isNonRootDevice()) {
+            if (!BearMod::NonRoot::FridaGadgetManager::isNonRootDevice()) {
                 return JNI_FALSE;
             }
 

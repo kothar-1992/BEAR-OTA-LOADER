@@ -10,7 +10,7 @@
 #include <unordered_map>
 
 
-    namespace BearLoader::NonRoot {
+    namespace BearMod::NonRoot {
         
         /**
          * Objection APK Patcher
@@ -222,7 +222,7 @@
             std::vector<std::string> getRequiredPermissions();
         }
         
-    } // namespace BearLoader::NonRoot
+    } // namespace BearMod::NonRoot
 
 
 #endif // BEARMOD_OBJECTION_PATCHER_H

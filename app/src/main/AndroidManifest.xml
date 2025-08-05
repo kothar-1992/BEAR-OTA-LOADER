@@ -3,7 +3,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools">
 
- <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE"/>
@@ -12,10 +12,7 @@
             android:name="android.permission.WRITE_EXTERNAL_STORAGE"
             tools:ignore="ScopedStorage"/>
 
-
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-
-    <uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND"/>
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
@@ -39,6 +36,7 @@
 
     <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
 
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND"/>
 
     <!-- Storage permissions for OBB file access -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -50,7 +48,7 @@
     <uses-permission android:name="android.permission.INSTALL_PACKAGES"
         tools:ignore="ProtectedPermissions" />
 
-   <!-- Service and foreground service permissions -->
+    <!-- Service and foreground service permissions -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -70,23 +68,23 @@
 
     <application
         android:allowBackup="true"
+        android:requestLegacyExternalStorage="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:roundIcon="?attr/actionBarDivider"
         android:supportsRtl="true"
-        android:requestLegacyExternalStorage="true"
         android:theme="@style/AppTheme"
         tools:ignore="RtlEnabled">
 
-      <activity
+        <activity
             android:name="com.bearmod.MainActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/AppTheme"
             android:screenOrientation="fullSensor"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout"
             tools:ignore="DiscouragedApi,IntentFilterExportedReceiver">
 
-      <intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -95,14 +93,14 @@
 
         <activity
 
-      android:name="com.bearmod.LauncherLoginActivity"
+                android:name="com.bearmod.LauncherLoginActivity"
                 android:exported="false"
                 android:theme="@style/AppTheme"
                 android:screenOrientation="fullSensor"
                 android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout"
                 tools:ignore="DiscouragedApi"/>
 
-      <!-- FileProvider for APK installation -->
+        <!-- FileProvider for APK installation -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
