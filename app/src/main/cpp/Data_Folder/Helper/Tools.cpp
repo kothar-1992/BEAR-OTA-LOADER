@@ -110,7 +110,8 @@ uintptr_t findPattern(const char *lib, const char *bMask, const char *szMask) {
 }
 
 int setPageProtection(void *target, int protection) {
-    void *page_start = (void *)((uint32_t)target - (uint32_t)target % PAGE_SIZE);
+    // Fixed: Use uintptr_t for ARM64 compatibility (64-bit pointers)
+    void *page_start = (void *)((uintptr_t)target - (uintptr_t)target % PAGE_SIZE);
     return mprotect((void *) page_start, PAGE_SIZE, protection);
 }
 

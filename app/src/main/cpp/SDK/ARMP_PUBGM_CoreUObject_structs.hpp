@@ -1,5 +1,17 @@
 #pragma once
 
+// Portable inline macro for cross-platform compatibility
+#ifdef _MSC_VER
+    #define FORCE_INLINE __forceinline
+#else
+    #define FORCE_INLINE inline __attribute__((always_inline))
+#endif
+
+// Math constants
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 // PUBG MOBILE (3.5.0) 64bit (Telegram : @TEAMNRG1)
 namespace SDK
 {
@@ -305,58 +317,58 @@ struct FVector
         {
         }
 
-        __forceinline FVector operator-(const FVector & V)
+        FORCE_INLINE FVector operator-(const FVector & V)
         {
             return FVector(X - V.X, Y - V.Y, Z - V.Z);
         }
 
-        __forceinline FVector operator+(const FVector & V)
+        FORCE_INLINE FVector operator+(const FVector & V)
         {
             return FVector(X + V.X, Y + V.Y, Z + V.Z);
         }
 
-        __forceinline FVector operator*(float Scale)const
+        FORCE_INLINE FVector operator*(float Scale)const
         {
             return FVector(X * Scale, Y * Scale, Z * Scale);
         }
 
-        __forceinline FVector operator/(float Scale)const
+        FORCE_INLINE FVector operator/(float Scale)const
         {
             const float RScale = 1.f / Scale;
               return FVector(X * RScale, Y * RScale, Z * RScale);
         }
 
-        __forceinline FVector operator+(float A)const
+        FORCE_INLINE FVector operator+(float A)const
         {
             return FVector(X + A, Y + A, Z + A);
         }
 
-        __forceinline FVector operator-(float A)const
+        FORCE_INLINE FVector operator-(float A)const
         {
             return FVector(X - A, Y - A, Z - A);
         }
 
-        __forceinline FVector operator*(const FVector & V)const
+        FORCE_INLINE FVector operator*(const FVector & V)const
         {
             return FVector(X * V.X, Y * V.Y, Z * V.Z);
         }
 
-        __forceinline FVector operator/(const FVector & V)const
+        FORCE_INLINE FVector operator/(const FVector & V)const
         {
             return FVector(X / V.X, Y / V.Y, Z / V.Z);
         }
 
-        __forceinline float operator|(const FVector & V) const
+        FORCE_INLINE float operator|(const FVector & V) const
         {
             return X * V.X + Y * V.Y + Z * V.Z;
         }
 
-        __forceinline float operator^(const FVector & V) const
+        FORCE_INLINE float operator^(const FVector & V) const
         {
             return X * V.Y - Y * V.X - Z * V.Z;
         }
 
-        __forceinline FVector & operator+=(const FVector & v)
+        FORCE_INLINE FVector & operator+=(const FVector & v)
         {
             X += v.X;
             Y += v.Y;
@@ -364,7 +376,7 @@ struct FVector
             return *this;
         }
 
-        __forceinline FVector & operator-=(const FVector & v)
+        FORCE_INLINE FVector & operator-=(const FVector & v)
         {
             X -= v.X;
             Y -= v.Y;
@@ -372,7 +384,7 @@ struct FVector
             return *this;
         }
 
-        __forceinline FVector & operator*=(const FVector & v)
+        FORCE_INLINE FVector & operator*=(const FVector & v)
         {
             X *= v.X;
             Y *= v.Y;
@@ -380,7 +392,7 @@ struct FVector
             return *this;
         }
 
-        __forceinline FVector & operator/=(const FVector & v)
+        FORCE_INLINE FVector & operator/=(const FVector & v)
         {
             X /= v.X;
             Y /= v.Y;
@@ -388,17 +400,17 @@ struct FVector
             return *this;
         }
 
-        __forceinline bool operator==(const FVector & src)const
+        FORCE_INLINE bool operator==(const FVector & src)const
         {
             return (src.X == X) && (src.Y == Y) && (src.Z == Z);
         }
 
-        __forceinline bool operator!=(const FVector & src)const
+        FORCE_INLINE bool operator!=(const FVector & src)const
         {
             return (src.X != X) || (src.Y != Y) || (src.Z != Z);
         }
 
-        __forceinline float Distance(FVector PE_Result)
+        FORCE_INLINE float Distance(FVector PE_Result)
         {
             return float (sqrtf(powf(PE_Result.X - X, 2.0) + powf(PE_Result.Y - Y, 2.0) + powf(PE_Result.Z - Z, 2.0)));
         }
@@ -409,33 +421,33 @@ struct FVector
             return sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
         }
 
-        __forceinline float Size() const
+        FORCE_INLINE float Size() const
         {
             return sqrt(X * X + Y * Y + Z * Z);
         }
 
-        __forceinline float Size2D() const
+        FORCE_INLINE float Size2D() const
         {
             return sqrt(X * X + Y * Y);
         }
 
-        __forceinline float SizeSquared() const
+        FORCE_INLINE float SizeSquared() const
         {
             return X * X + Y * Y + Z * Z;
         }
 
-        __forceinline float SizeSquared2D() const
+        FORCE_INLINE float SizeSquared2D() const
         {
             return X * X + Y * Y;
         }
 
-        __forceinline float Dot(const FVector & vOther) const
+        FORCE_INLINE float Dot(const FVector & vOther) const
         {
             const FVector & a = *this;
               return (a.X * vOther.X + a.Y * vOther.Y + a.Z * vOther.Z);
         }
 
-        __forceinline FVector Normalize()
+        FORCE_INLINE FVector Normalize()
         {
             FVector vector;
             float length = this->Size();

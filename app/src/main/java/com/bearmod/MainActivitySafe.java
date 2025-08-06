@@ -101,8 +101,7 @@ public class MainActivitySafe extends AppCompatActivity {
                 
                 // Try to load native library safely
                 try {
-                    System.loadLibrary("BearMod");
-                    System.loadLibrary("BEAR");
+                    System.loadLibrary("bearmod"); // Load correct native library
                     status.setText("Native library loaded");
                 } catch (Exception e) {
                     status.setText("Running in demo mode");

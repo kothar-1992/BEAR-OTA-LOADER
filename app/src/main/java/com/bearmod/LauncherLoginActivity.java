@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
@@ -30,12 +31,13 @@ import android.widget.Toast;
 
 import java.util.Objects;
 
+import com.bearmod.security.AuthenticationManager;
+
 public class LauncherLoginActivity extends AppCompatActivity {
     private static final String TAG = "LauncherLoginActivity";
 
-    // SharedPreferences constants
-    private static final String PREFS_NAME = "BearModPrefs";
-    private static final String PREF_LICENSE_KEY = "license_key";
+    // SharedPreferences constants - FIXED: Use same system as Launcher.java
+    private static final String PREF_LICENSE_KEY = "USER_KEY";  // Match Launcher.java
     private static final String PREF_REMEMBER_KEY = "remember_key";
     private static final String PREF_AUTO_LOGIN = "auto_login";
 
@@ -108,8 +110,8 @@ public class LauncherLoginActivity extends AppCompatActivity {
         statusText = findViewById(R.id.status_text);
         View loginContainer = findViewById(R.id.login_container);
 
-        // Initialize SharedPreferences
-        sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        // Initialize SharedPreferences - FIXED: Use same system as Launcher.java
+        sharedPreferences = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
 
         // Set initial visibility
         progressBar.setVisibility(View.GONE);
@@ -130,18 +132,22 @@ public class LauncherLoginActivity extends AppCompatActivity {
 
         // Checkbox listeners for saving preferences
         checkboxRememberKey.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.d(TAG, "Remember Key checkbox changed: " + isChecked);
             savePreference(PREF_REMEMBER_KEY, isChecked);
             if (!isChecked) {
                 // If remember key is disabled, also disable auto-login
+                Log.d(TAG, "Remember Key disabled - also disabling Auto Login");
                 checkboxAutoLogin.setChecked(false);
                 savePreference(PREF_AUTO_LOGIN, false);
             }
         });
 
         checkboxAutoLogin.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.d(TAG, "Auto Login checkbox changed: " + isChecked);
             savePreference(PREF_AUTO_LOGIN, isChecked);
             if (isChecked) {
                 // If auto-login is enabled, also enable remember key
+                Log.d(TAG, "Auto Login enabled - also enabling Remember Key");
                 checkboxRememberKey.setChecked(true);
                 savePreference(PREF_REMEMBER_KEY, true);
             }
@@ -165,68 +171,56 @@ public class LauncherLoginActivity extends AppCompatActivity {
 
         // Show loading state
         setLoadingState(true);
-        statusText.setText("Verifying license...");
+        statusText.setText("Initializing KeyAuth...");
         statusText.setVisibility(View.VISIBLE);
 
-        // Check if BearMod core is initialized
-        if (mMundoInitialized && mMundoCore != null) {
-            // Use BearMod core for authentication
-            new Thread(() -> {
-                boolean authResult = mMundoCore.authenticateKeyAuth(licenseKey);
+        // Use the original SimpleLicenseVerifier authentication method
+        performAuthentication(licenseKey);
+    }
 
+    private void performAuthentication(String licenseKey) {
+        // Use new Java-only AuthenticationManager for all authentication
+        // This replaces both BearMod core and direct SimpleLicenseVerifier calls
+
+        AuthenticationManager authManager = AuthenticationManager.getInstance(this);
+
+        authManager.authenticateWithKeyAuth(licenseKey, new AuthenticationManager.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationSuccess(String message) {
                 runOnUiThread(() -> {
-                    if (authResult) {
-                        statusText.setText("BearMod license login successful!");
+                    statusText.setText("License login successful!");
+                    statusText.setTextColor(0xFF4CAF50); // Green color for success
 
-                        // Save license key if remember key is enabled
-                        saveLicenseKeyIfNeeded(licenseKey);
+                    // Save license key if remember key is enabled
+                    saveLicenseKeyIfNeeded(licenseKey);
 
-                        // Return success to MainActivity after short delay
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            setResult(RESULT_OK);
-                            finish();
-                        }, 1000);
-                    } else {
-                        setLoadingState(false);
-                        String errorMsg = mMundoCore.getLastError();
-                        statusText.setText("Login failed: " + errorMsg);
-                        statusText.setTextColor(0xFFFF6B6B); // Red color for error
-                        Toast.makeText(LauncherLoginActivity.this,
-                                "Login failed: " + errorMsg, Toast.LENGTH_LONG).show();
-                    }
+                    // Return success to MainActivity after short delay
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        setResult(RESULT_OK);
+                        finish();
+                    }, 1000);
                 });
-            }).start();
-        } else {
-            // Fallback to original login method
-            Launcher.loginAsync(this, licenseKey, new Launcher.LoginCallback() {
-                @Override
-                public void onSuccess() {
-                    runOnUiThread(() -> {
-                        statusText.setText("BearMod license login successful!");
+            }
 
-                        // Save license key if remember key is enabled
-                        saveLicenseKeyIfNeeded(licenseKey);
+            @Override
+            public void onAuthenticationFailure(String error) {
+                runOnUiThread(() -> {
+                    setLoadingState(false);
+                    statusText.setText("License login failed: " + error);
+                    statusText.setTextColor(0xFFFF6B6B); // Red color for error
+                    Toast.makeText(LauncherLoginActivity.this,
+                            "Login failed: " + error, Toast.LENGTH_LONG).show();
+                });
+            }
 
-                        // Return success to MainActivity after short delay
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            setResult(RESULT_OK);
-                            finish();
-                        }, 1000);
-                    });
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    runOnUiThread(() -> {
-                        setLoadingState(false);
-                        statusText.setText("Login failed: " + errorMessage);
-                        statusText.setTextColor(0xFFFF6B6B); // Red color for error
-                        Toast.makeText(LauncherLoginActivity.this,
-                                "Login failed: " + errorMessage, Toast.LENGTH_LONG).show();
-                    });
-                }
-            });
-        }
+            @Override
+            public void onAuthenticationProgress(String status) {
+                runOnUiThread(() -> {
+                    statusText.setText(status);
+                    statusText.setTextColor(0xFF2196F3); // Blue color for progress
+                });
+            }
+        });
     }
 
     private void setLoadingState(boolean loading) {
@@ -260,10 +254,15 @@ public class LauncherLoginActivity extends AppCompatActivity {
             // Get Mundo core instance
             mMundoCore = MundoCore.getInstance(this);
 
-            // Create configuration
+            // Get stored tokens from SharedPreferences
+            SharedPreferences prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
+            String keyAuthToken = prefs.getString("KEYAUTH_TOKEN", "demo_keyauth_token");
+            String bearToken = prefs.getString("USER_KEY", "demo_bear_token");
+
+            // Create configuration with real tokens
             MundoCore.MundoConfig config = new MundoCore.MundoConfig(
-                    "demo_keyauth_token",  // Replace with your actual BearMod auth token
-                    "demo_bear_token"      // Replace with your actual BearMod token
+                    keyAuthToken,  // Use retrieved KeyAuth token
+                    bearToken      // Use stored license key as bearToken
             );
 
             config.targetPackage = "com.tencent.ig";  // PUBG Mobile
@@ -315,11 +314,17 @@ public class LauncherLoginActivity extends AppCompatActivity {
      * Load saved preferences and apply them to UI
      */
     private void loadSavedPreferences() {
-        boolean rememberKey = sharedPreferences.getBoolean(PREF_REMEMBER_KEY, false);
+        // Default "Remember Key" to true for better UX, "Auto Login" to false for security
+        boolean rememberKey = sharedPreferences.getBoolean(PREF_REMEMBER_KEY, true);
         boolean autoLogin = sharedPreferences.getBoolean(PREF_AUTO_LOGIN, false);
 
         checkboxRememberKey.setChecked(rememberKey);
         checkboxAutoLogin.setChecked(autoLogin);
+
+        // Save the default preference if this is the first time
+        if (!sharedPreferences.contains(PREF_REMEMBER_KEY)) {
+            savePreference(PREF_REMEMBER_KEY, true);
+        }
 
         if (rememberKey) {
             String savedKey = sharedPreferences.getString(PREF_LICENSE_KEY, "");
@@ -347,11 +352,16 @@ public class LauncherLoginActivity extends AppCompatActivity {
      * Save license key if remember key is enabled
      */
     private void saveLicenseKeyIfNeeded(String licenseKey) {
-        if (checkboxRememberKey.isChecked()) {
+        boolean rememberKeyChecked = checkboxRememberKey.isChecked();
+        Log.d(TAG, "saveLicenseKeyIfNeeded - Remember Key checked: " + rememberKeyChecked);
+
+        if (rememberKeyChecked) {
             sharedPreferences.edit().putString(PREF_LICENSE_KEY, licenseKey).apply();
+            Log.d(TAG, "License key saved to SharedPreferences");
         } else {
             // Clear saved key if remember is disabled
             sharedPreferences.edit().remove(PREF_LICENSE_KEY).apply();
+            Log.d(TAG, "License key cleared from SharedPreferences");
         }
     }
 

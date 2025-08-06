@@ -2,88 +2,71 @@ package com.bearmod;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
+import android.view.WindowManager;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
-
-import android.util.Log;
-import android.view.Choreographer;
-import android.view.WindowManager;
 
 public class GLES3JNIView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     private static final String TAG = "GLES3JNIView";
 
+    static {
+        try {
+            System.loadLibrary("bearmod");
+            Log.d(TAG, "Native libraries loaded successfully");
+        } catch (UnsatisfiedLinkError e) {
+            Log.e(TAG, "Failed to load native libraries: " + e.getMessage());
+        }
+    }
 
-    private WindowManager.LayoutParams layoutParams;
+    private boolean isVisible;
 
     public GLES3JNIView(Context context) {
         super(context);
-        if (IsHide()){
-        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        getHolder().setFormat(-3);
-        getHolder().lockCanvas(); //
 
         setEGLContextClientVersion(3);
+        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        getHolder().setFormat(-3);
 
         setRenderer(this);
-           // startRendering();
-        requestRender();//
-
-            try {
-                System.loadLibrary("BearMod");
-                System.loadLibrary("BEAR");
-                Log.d(TAG, "Native library loaded successfully in Floating");
-            } catch (UnsatisfiedLinkError e) {
-                Log.e(TAG, "Failed to load native library in Floating: " + e.getMessage());
-            }
-
-        }
+        setRenderMode(RENDERMODE_CONTINUOUSLY); // or WHEN_DIRTY for power saving
     }
 
-    
-    public void onDrawFrame(GL10 gl) {
-        if (IsHide()){
-        step();
-        //    startRendering();
-        //    startRendering3();
-        }
-    }
-
-    public void onSurfaceChanged(GL10 gl, int width, int height) {
-        if (IsHide()){
-        resize(width, height);
-        }
-    }
-
+    @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        if (IsHide()){
-        init();
-        //    startRendering();
-        //    startRendering3();
+        isVisible = IsHide();
+        if (isVisible) {
+            init();
         }
     }
-    
-    
-    
+
+    @Override
+    public void onSurfaceChanged(GL10 gl, int width, int height) {
+        if (isVisible) {
+            resize(width, height);
+        }
+    }
+
+    @Override
+    public void onDrawFrame(GL10 gl) {
+        if (isVisible) {
+            step();
+        }
+    }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         imgui_Shutdown();
     }
-    
-    
-        private Choreographer.FrameCallback frameCallback;
-        private boolean isRendering = false;
 
     public static native void init();
     public static native void resize(int width, int height);
     public static native void step();
     public static native void imgui_Shutdown();
-    public static native void MotionEventClick(boolean down,float PosX,float PosY);
+    public static native void MotionEventClick(boolean down, float PosX, float PosY);
     public static native String getWindowRect();
-    private native boolean IsHide(); 
-  //  public static native void Mode(int Game, int Root, int Bit);
-    
+    private native boolean IsHide();
 }

@@ -9,7 +9,7 @@ MUNDO_SRC := \
     core/mundo_core.cpp \
     integration/keyauth_bridge.cpp \
     security/security_manager.cpp \
-    nonroot/nonroot_manager.cpp \
+    stealth/stealth_manager.cpp \
     utils/mundo_utils.cpp \
     jni/mundo_jni_bridge.cpp
 
@@ -19,8 +19,12 @@ LOCAL_SRC_FILES := $(MUNDO_SRC)
 LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/include \
     $(LOCAL_PATH)/src \
-    $(LOCAL_PATH)/../app/src/main/cpp \
-    $(LOCAL_PATH)/../Plugin/src/main/cpp
+    $(LOCAL_PATH)/../../../app/src/main/cpp/BYPASS/Substrate \
+    $(LOCAL_PATH)/../../../app/src/main/cpp/BYPASS/Includes \
+    $(LOCAL_PATH)/../../../app/src/main/cpp/BYPASS/config \
+    $(LOCAL_PATH)/../../../app/src/main/cpp/BYPASS/patch \
+    $(LOCAL_PATH)/../../../app/src/main/cpp/BYPASS/anti_hook \
+    $(LOCAL_PATH)/../../../app/src/main/cpp/BYPASS/nonroot
 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
 
@@ -48,6 +52,6 @@ LOCAL_LDFLAGS := -Wl,--gc-sections
 LOCAL_LDFLAGS += -Wl,--strip-all
 
 # Libraries
-LOCAL_LDLIBS := -llog -landroid
+LOCAL_LDLIBS := -llog -landroid -lz
 
 include $(BUILD_SHARED_LIBRARY)

@@ -1,5 +1,6 @@
 package com.bearmod.injection;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -7,7 +8,6 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -25,7 +25,8 @@ public class InjectionManager {
 
     // Shared native library manager
     private final NativeLibraryManager nativeLibraryManager;
-    
+    private String libraryPath;
+
     private InjectionManager(Context context) {
         this.context = context.getApplicationContext();
         this.executor = Executors.newSingleThreadExecutor();
@@ -97,7 +98,7 @@ public class InjectionManager {
             pm.getPackageInfo(targetPackage, 0);
             
             // Check if package is running
-            if (!isPackageRunning(targetPackage)) {
+            if (isPackageRunning(targetPackage)) {
                 Log.w(TAG, "Target package is not running: " + targetPackage);
                 // Continue anyway - we can inject when it starts
             }
@@ -128,16 +129,16 @@ public class InjectionManager {
             if (am != null) {
                 for (android.app.ActivityManager.RunningAppProcessInfo processInfo : am.getRunningAppProcesses()) {
                     if (packageName.equals(processInfo.processName)) {
-                        return true;
+                        return false;
                     }
                 }
             }
             
-            return false;
+            return true;
             
         } catch (Exception e) {
             Log.e(TAG, "Error checking if package is running", e);
-            return false;
+            return true;
         }
     }
     
@@ -264,7 +265,7 @@ public class InjectionManager {
      */
     private String findExistingLibrary() {
         try {
-            String[] searchPaths = {
+            @SuppressLint("SdCardPath") String[] searchPaths = {
                 context.getApplicationInfo().nativeLibraryDir + "/libbearmod.so",
                 "/data/data/" + context.getPackageName() + "/lib/libbearmod.so",
                 context.getFilesDir() + "/lib/arm64-v8a/libbearmod.so",
@@ -340,12 +341,13 @@ public class InjectionManager {
      * Try process injection method
      */
     private boolean tryProcessInjection(String targetPackage, String libraryPath) {
+        this.libraryPath = libraryPath;
         try {
             // Use ptrace or similar methods for process injection
             Log.d(TAG, "Attempting process injection...");
             
             // Check if target package is running
-            if (!isPackageRunning(targetPackage)) {
+            if (isPackageRunning(targetPackage)) {
                 Log.d(TAG, "Target package not running: " + targetPackage);
                 return false;
             }
@@ -364,6 +366,7 @@ public class InjectionManager {
      * Try hook-based injection method
      */
     private boolean tryHookBasedInjection(String targetPackage, String libraryPath) {
+        this.libraryPath = libraryPath;
         try {
             // Use existing hook system for injection
             Log.d(TAG, "Attempting hook-based injection...");
@@ -428,9 +431,9 @@ public class InjectionManager {
         }
     }
     
-    // Native method declarations
-    private native boolean nativeIsLibraryLoaded();
-    private native String nativeGetLibraryPath();
+    // Native method declarations - injection-specific methods only
+    // Note: Library management methods (nativeIsLibraryLoaded, nativeGetLibraryPath)
+    // are handled by NativeLibraryManager to avoid duplication
     private native boolean nativeInjectLibrary(String targetPackage, String libraryPath);
     private native void nativeCleanupInjection();
     

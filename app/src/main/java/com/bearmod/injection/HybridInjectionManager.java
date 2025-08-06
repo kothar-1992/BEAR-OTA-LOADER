@@ -1,10 +1,11 @@
 package com.bearmod.injection;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 
 import com.bearmod.patch.model.PatchResult;
-import com.bearmod.auth.AuthenticationManager;
+import com.bearmod.security.AuthenticationManager;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class HybridInjectionManager {
     private static final String TAG = "HybridInjectionManager";
     
+    @SuppressLint("StaticFieldLeak")
     private static HybridInjectionManager instance;
     private static final Object lock = new Object();
     
@@ -56,37 +58,31 @@ public class HybridInjectionManager {
     }
 
     /**
-     * Adapter to bridge with existing KeyAuthInjectionManager.InjectionCallback
-     */
-    private static class KeyAuthCallbackAdapter implements KeyAuthInjectionManager.InjectionCallback {
-        private final InjectionCallback hybridCallback;
-        private final String targetPackage;
-
-        public KeyAuthCallbackAdapter(InjectionCallback hybridCallback, String targetPackage) {
-            this.hybridCallback = hybridCallback;
-            this.targetPackage = targetPackage;
-        }
+         * Adapter to bridge with existing KeyAuthInjectionManager.InjectionCallback
+         */
+        private record KeyAuthCallbackAdapter(InjectionCallback hybridCallback,
+                                              String targetPackage) implements KeyAuthInjectionManager.InjectionCallback {
 
         @Override
-        public void onInjectionStarted() {
-            hybridCallback.onInjectionStarted(targetPackage);
-        }
+            public void onInjectionStarted() {
+                hybridCallback.onInjectionStarted(targetPackage);
+            }
 
-        @Override
-        public void onInjectionProgress(int progress, String message) {
-            hybridCallback.onInjectionProgress(targetPackage, progress, message);
-        }
+            @Override
+            public void onInjectionProgress(int progress, String message) {
+                hybridCallback.onInjectionProgress(targetPackage, progress, message);
+            }
 
-        @Override
-        public void onInjectionSuccess(PatchResult result) {
-            hybridCallback.onInjectionSuccess(targetPackage, result);
-        }
+            @Override
+            public void onInjectionSuccess(PatchResult result) {
+                hybridCallback.onInjectionSuccess(targetPackage, result);
+            }
 
-        @Override
-        public void onInjectionFailed(String error) {
-            hybridCallback.onInjectionFailed(targetPackage, error);
+            @Override
+            public void onInjectionFailed(String error) {
+                hybridCallback.onInjectionFailed(targetPackage, error);
+            }
         }
-    }
     
     /**
      * Initialize the hybrid injection system
@@ -408,6 +404,6 @@ public class HybridInjectionManager {
 
     // Static block removed - library loading now handled by NativeLibraryManager
     static {
-        Log.d(TAG, "HybridInjectionManager class loaded - native library loading handled by NativeLibraryManager");
+        Log.d(TAG, "jectionManager class loaded - native library loading handled by NativeLibraryManager");
     }
 }

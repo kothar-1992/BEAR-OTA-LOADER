@@ -41,7 +41,7 @@ rootProject.name = "Bear-Loader"
 //    - Output: libmundo.so or AAR (arm64-v8a, armeabi-v7a)
 //    - Build System: Android.mk (existing at mundo_core/Android.mk)
 //    - Role: Security, injection, KeyAuth bridge APIs
-//    - Auto-copy: Distributes libmundo.so to Plugin/ and app/ modules
+//    - Auto-copy: Distributes libmundo.so to and app/ modules
 include(":mundo_core")
 // 2. app: BearMod Development App Module
 //    - Type: Android application with native components

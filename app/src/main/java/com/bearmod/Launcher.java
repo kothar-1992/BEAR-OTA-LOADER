@@ -9,7 +9,7 @@ import android.util.Log;
 
 import android.app.Activity;
 
-import com.bearmod.auth.SimpleLicenseVerifier;
+import com.bearmod.security.SimpleLicenseVerifier;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -21,20 +21,18 @@ public class Launcher {
 
 
 
-
-    private static boolean nativeLibraryLoaded = false;
-
-    static{
-        try {
-            System.loadLibrary("BearMod");
-            System.loadLibrary("BEAR");
-            nativeLibraryLoaded = true;
-            android.util.Log.d("Launcher", "Native library loaded successfully");
-        } catch (UnsatisfiedLinkError e) {
-            android.util.Log.e("Launcher", "Failed to load native library: " + e.getMessage());
-            nativeLibraryLoaded = false;
-        }
+private static boolean nativeLibraryLoaded = true;
+static {
+    try {
+        System.loadLibrary("bearmod"); // Includes libclient_static
+        android.util.Log.d("Launcher", "Native library loaded successfully");
+        nativeLibraryLoaded = true;
+    } catch (UnsatisfiedLinkError e) {
+        android.util.Log.e("Launcher", "Failed to load native library: " + e.getMessage());
+        nativeLibraryLoaded = false;
     }
+}
+
 
 
     public static void Init(Object object) {
@@ -150,7 +148,7 @@ public class Launcher {
      * Get device HWID for debugging/logging
      */
     public static String getDeviceHWID(Context context) {
-        return com.bearmod.auth.HWID.getHWID();
+        return com.bearmod.security.HWID.getHWID();
     }
 
     /**

@@ -4,16 +4,22 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 
+import com.bearmod.security.SimpleLicenseVerifier;
+import com.bearmod.security.SignatureVerifier;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CompletableFuture;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONObject;
 
@@ -32,31 +38,10 @@ public class SecureScriptManager {
     // Thread-safe script cache
     private final Map<String, String> scriptCache = new ConcurrentHashMap<>();
     // KeyAuth integration - Use existing SimpleLicenseVerifier patterns
-    private static final String KEYAUTH_API_URL = "https://keyauth.win/api/1.3/";
-    private static final String APP_NAME = "BearMod";
-    private static final String OWNER_ID = "Ej8RQBrGLs";
 
-    // KeyAuth FileID mapping for secure script delivery
-    private static final Map<String, String> SCRIPT_FILE_IDS = new HashMap<String, String>() {{
-        // Payload scripts
-        put("bearmod_base", "BEARMOD_BASE_FILEID");
-        put("bearmod_global", "BEARMOD_GLOBAL_FILEID");
-        put("bearmod_korea", "BEARMOD_KOREA_FILEID");
-        put("bearmod_taiwan", "BEARMOD_TAIWAN_FILEID");
-        put("bearmod_vietnam", "BEARMOD_VIETNAM_FILEID");
-
-        // Security bypass scripts
-        put("bypass-signkill", "BYPASS_SIGNKILL_FILEID");
-        put("bypass-ssl", "BYPASS_SSL_FILEID");
-        put("anti-detection", "ANTI_DETECTION_FILEID");
-        put("analyzer", "ANALYZER_FILEID");
-
-        // Additional scripts
-        put("bearmod_analyzer", "BEARMOD_ANALYZER_FILEID");
-        put("config", "CONFIG_FILEID");
-        put("quick_hook", "QUICK_HOOK_FILEID");
-        put("script_loader", "SCRIPT_LOADER_FILEID");
-    }};
+    // CONSOLIDATED: Use centralized file ID system from SimpleLicenseVerifier
+    // All file IDs are now managed in SimpleLicenseVerifier.MASTER_FILE_IDS
+    // No more duplicate file ID definitions in this class
 
     private SecureScriptManager(Context context) {
         this.context = context;
@@ -91,10 +76,10 @@ public class SecureScriptManager {
             }
         }
 
-        // Primary source: KeyAuth secure delivery (for both debug and production)
+        // Primary source: Centralized FileHelper system (KeyAuth ZIP-based delivery)
         if (scriptContent == null) {
-            Log.d(TAG, "Loading script from KeyAuth secure delivery: " + patchId);
-            scriptContent = fetchScriptFromKeyAuth(patchId);
+            Log.d(TAG, "Loading script from centralized FileHelper system: " + patchId);
+            scriptContent = fetchScriptFromCentralizedSystem(patchId);
 
             // Verify signature if script was fetched remotely
             if (scriptContent != null && !verifyScriptSignature(patchId, scriptContent)) {
@@ -103,7 +88,13 @@ public class SecureScriptManager {
             }
         }
 
-        // Fallback: Production embedded resources (encrypted, no longer used for security)
+        // Fallback 1: Load from assets (re-enabled for offline support)
+        if (scriptContent == null) {
+            Log.d(TAG, "Fallback to assets: " + patchId);
+            scriptContent = loadFromAssets(patchId);
+        }
+
+        // Fallback 2: Production embedded resources (encrypted, deprecated)
         if (scriptContent == null && !isDebugBuild) {
             Log.d(TAG, "Fallback to secure storage (deprecated): " + patchId);
             scriptContent = loadFromSecureStorage(patchId);
@@ -152,12 +143,49 @@ public class SecureScriptManager {
     }
     
     /**
-     * Load script from assets - DEPRECATED: Assets no longer contain scripts for security
-     * Scripts are now delivered exclusively via KeyAuth secure delivery system
+     * Load script from assets using consolidated AssetExtractor (MEMORY-ONLY)
+     * UPDATED: Uses AssetExtractor.extractScriptToMemory() for consistency
      */
     private String loadFromAssets(String patchId) {
-        Log.d(TAG, "Asset loading skipped - Scripts removed from APK for security: " + patchId);
-        return null;
+        try {
+            // Map patch IDs to script file names
+            String scriptFileName = getScriptFileNameForPatchId(patchId);
+            if (scriptFileName == null) {
+                Log.w(TAG, "Unknown patch ID: " + patchId);
+                return null;
+            }
+
+            // Use consolidated AssetExtractor for memory-only extraction
+            String scriptContent = com.bearmod.utils.AssetExtractor.extractScriptToMemory(context, scriptFileName);
+            if (scriptContent != null) {
+                Log.d(TAG, "Loaded script from assets via AssetExtractor: " + patchId);
+                return scriptContent;
+            } else {
+                Log.w(TAG, "Script not found in assets: " + scriptFileName);
+                return null;
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading script from assets", e);
+            return null;
+        }
+    }
+
+    /**
+     * Map patch IDs to script file names for AssetExtractor integration
+     */
+    private String getScriptFileNameForPatchId(String patchId) {
+        Map<String, String> patchMappings = new HashMap<>();
+        patchMappings.put("bearmod-analyzer", "bearmod_analyzer.js");
+        patchMappings.put("anti-detection", "anti-detection.js");
+        patchMappings.put("bypass-ssl", "bypass-ssl.js");
+        patchMappings.put("bypass-signkill", "bypass-signkill.js");
+        patchMappings.put("quick-hook", "quick_hook.js");
+        patchMappings.put("analyzer", "bearmod_analyzer.js"); // Map to actual file
+        patchMappings.put("config", "config.js");
+        patchMappings.put("library-injection", "quick_hook.js"); // Fallback
+
+        return patchMappings.get(patchId);
     }
     
     /**
@@ -283,55 +311,266 @@ public class SecureScriptManager {
     }
 
     /**
-     * Fetch script from KeyAuth API using FileID mapping - Secure delivery system
+     * Fetch script from centralized FileHelper system - ZIP-based delivery
+     * UPDATED: Uses consolidated script management instead of individual file IDs
      */
-    private String fetchScriptFromKeyAuth(String patchId) {
+    private String fetchScriptFromCentralizedSystem(String patchId) {
         try {
-            // Get KeyAuth FileID for this script
-            String fileId = SCRIPT_FILE_IDS.get(patchId);
-            if (fileId == null) {
-                Log.w(TAG, "No KeyAuth FileID mapping found for script: " + patchId);
+            Log.d(TAG, "Fetching script from centralized system: " + patchId);
+
+            // Check memory cache first (following KeyAuthInjectionManager memory-first pattern)
+            String cachedScript = getScriptFromMemoryCache(patchId);
+            if (cachedScript != null) {
+                Log.d(TAG, "Script found in memory cache: " + patchId);
+                return cachedScript;
+            }
+
+            // KeyAuth server constraint: Scripts are delivered as ZIP collections only
+            // Check for scripts collection ZIP (required by KeyAuth server architecture)
+            String scriptsZipFileId = SimpleLicenseVerifier.getFileId("scripts_collection.zip");
+            if (scriptsZipFileId == null) {
+                Log.w(TAG, "Scripts collection ZIP not found in centralized system");
                 return null;
             }
 
-            // Use existing KeyAuth session if available
-            String sessionId = getKeyAuthSessionId();
-            if (sessionId == null) {
-                Log.w(TAG, "No active KeyAuth session for script download");
-                return null;
+            // Download and process ZIP collection (memory-only operation)
+            Log.d(TAG, "Found scripts collection ZIP file ID: " + scriptsZipFileId);
+
+            // Fetch signatures from KeyAuth before processing scripts
+            fetchSignaturesFromKeyAuth(scriptsZipFileId);
+
+            String zipProcessResult = processScriptsZip(scriptsZipFileId, patchId);
+
+            if ("ZIP_PROCESSED".equals(zipProcessResult)) {
+                // ZIP was processed and scripts cached in memory, try cache again
+                return getScriptFromMemoryCache(patchId);
             }
 
-            // Build KeyAuth file download URL using FileID
-            String downloadUrl = KEYAUTH_API_URL + "?type=file&fileid=" + fileId +
-                               "&sessionid=" + sessionId + "&name=" + APP_NAME + "&ownerid=" + OWNER_ID;
+            return null;
 
-            Log.d(TAG, "Downloading script from KeyAuth: " + patchId + " (FileID: " + fileId + ")");
-
-            java.net.URL url = new java.net.URL(downloadUrl);
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setConnectTimeout(10000);
-            conn.setReadTimeout(30000);
-            conn.addRequestProperty("User-Agent", "BearMod/1.0");
-
-            int responseCode = conn.getResponseCode();
-            if (responseCode == 200) {
-                InputStream input = conn.getInputStream();
-                byte[] buffer = new byte[input.available()];
-                input.read(buffer);
-                input.close();
-
-                String scriptContent = new String(buffer, "UTF-8");
-                Log.d(TAG, "Successfully downloaded script: " + patchId + " (size: " + scriptContent.length() + " bytes)");
-                return scriptContent;
-            } else {
-                Log.e(TAG, "KeyAuth download failed - Response code: " + responseCode + " for script: " + patchId);
-            }
         } catch (Exception e) {
-            Log.e(TAG, "Error downloading script from KeyAuth: " + patchId, e);
+            Log.e(TAG, "Error fetching script from centralized system: " + patchId, e);
+            return null;
         }
-        return null;
     }
+
+    private String processScriptsZip(String zipFileId, String patchId) {
+        try {
+            Log.d(TAG, "Processing scripts ZIP file: " + zipFileId);
+
+            // Download the scripts collection ZIP file into memory buffer (memory-only)
+            byte[] zipBuffer = downloadScriptsZip(zipFileId);
+            if (zipBuffer == null) {
+                Log.e(TAG, "Failed to download scripts ZIP file");
+                return null;
+            }
+
+            // processZipFromMemory now handles the complete memory-only process:
+            // 1. Downloads ZIP to temporary file
+            // 2. Reads ZIP into memory buffer
+            // 3. Extracts ALL scripts from memory and caches them
+            // 4. Cleans up temporary file
+            // 5. Returns processing status
+
+            // Get the specific script from memory cache
+            String scriptContent = getScriptFromMemoryCache(patchId);
+            if (scriptContent == null) {
+                Log.e(TAG, "Script not found in memory cache after ZIP processing: " + patchId);
+                return null;
+            }
+
+            Log.d(TAG, "Successfully extracted script: " + patchId + " (" + scriptContent.length() + " chars)");
+            return "ZIP_PROCESSED"; // Indicator that ZIP processing completed
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error processing scripts ZIP file", e);
+            return null;
+        }
+    }
+
+    private byte[] downloadScriptsZip(String zipFileId) {
+        try {
+            Log.d(TAG, "Downloading scripts ZIP file: " + zipFileId);
+
+            // Use SimpleLicenseVerifier's existing download mechanism (following OTAUpdateManager pattern)
+            final byte[][] zipBuffer = {null};
+            final boolean[] downloadComplete = {false};
+            final String[] errorMessage = {null};
+
+            SimpleLicenseVerifier.FileDownloadCallback callback = new SimpleLicenseVerifier.FileDownloadCallback() {
+                @Override
+                public void onDownloadStarted() {
+                    Log.d(TAG, "Scripts ZIP download started");
+                }
+
+                @Override
+                public void onDownloadComplete(String fileName, String filePath) {
+                    Log.d(TAG, "Scripts ZIP download complete: " + filePath);
+                    try {
+                        // Read ZIP file into memory buffer (following KeyAuthInjectionManager pattern)
+                        zipBuffer[0] = readFileToMemoryBuffer(filePath);
+
+                        // Clean up temporary file immediately (following OTAUpdateManager pattern)
+                        new File(filePath).delete();
+                        Log.d(TAG, "Temporary ZIP file cleaned up: " + filePath);
+
+                        downloadComplete[0] = true;
+
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to read ZIP to memory buffer", e);
+                        errorMessage[0] = "Failed to read ZIP to memory: " + e.getMessage();
+                        downloadComplete[0] = true;
+                    }
+                }
+
+                @Override
+                public void onDownloadFailed(String fileName, String error) {
+                    Log.e(TAG, "Scripts ZIP download failed: " + error);
+                    errorMessage[0] = error;
+                    downloadComplete[0] = true;
+                }
+
+                @Override
+                public void onDownloadProgress(String fileName, int progress) {
+                    Log.d(TAG, "Scripts ZIP download progress: " + progress + "%");
+                }
+            };
+
+            // Download the ZIP file using SimpleLicenseVerifier (same pattern as OTAUpdateManager)
+            String zipFileName = "scripts_collection.zip";
+            SimpleLicenseVerifier.downloadFileWithId(context, zipFileName, zipFileId, callback);
+
+            // Wait for download completion (with timeout)
+            int timeout = 30000; // 30 seconds
+            int elapsed = 0;
+            while (!downloadComplete[0] && elapsed < timeout) {
+                Thread.sleep(100);
+                elapsed += 100;
+            }
+
+            if (!downloadComplete[0]) {
+                Log.e(TAG, "Scripts ZIP download timeout");
+                return null;
+            }
+
+            if (errorMessage[0] != null) {
+                Log.e(TAG, "Scripts ZIP download failed: " + errorMessage[0]);
+                return null;
+            }
+
+            if (zipBuffer[0] == null) {
+                Log.e(TAG, "Scripts ZIP buffer is null");
+                return null;
+            }
+
+            Log.d(TAG, "Scripts ZIP loaded into memory: " + zipBuffer[0].length + " bytes");
+
+            // Return memory buffer for in-memory ZIP processing
+            return zipBuffer[0];
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error downloading scripts ZIP", e);
+            return null;
+        }
+    }
+
+    private byte[] readFileToMemoryBuffer(String filePath) throws IOException {
+        try (FileInputStream fis = new FileInputStream(filePath);
+             java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream()) {
+
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                baos.write(buffer, 0, bytesRead);
+            }
+
+            return baos.toByteArray();
+        }
+    }
+
+    private String processZipFromMemory(byte[] zipBuffer) {
+        // Memory-only ZIP extraction following KeyAuthInjectionManager pattern
+        Log.d(TAG, "Processing ZIP from memory buffer: " + zipBuffer.length + " bytes");
+
+        try {
+            // Extract scripts from memory buffer without touching filesystem
+            try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(zipBuffer);
+                 ZipInputStream zis = new ZipInputStream(bais)) {
+
+                ZipEntry entry;
+                while ((entry = zis.getNextEntry()) != null) {
+                    String entryName = entry.getName();
+                    Log.d(TAG, "Found ZIP entry: " + entryName);
+
+                    // Check if this is a script file we need
+                    if (entryName.startsWith("patches/") && entryName.endsWith("/script.js")) {
+                        // Extract the patch ID from the path
+                        String[] pathParts = entryName.split("/");
+                        if (pathParts.length >= 3) {
+                            String patchId = pathParts[1]; // patches/[patchId]/script.js
+
+                            // Read script content directly from memory stream
+                            StringBuilder content = new StringBuilder();
+                            byte[] buffer = new byte[1024];
+                            int length;
+
+                            while ((length = zis.read(buffer)) > 0) {
+                                content.append(new String(buffer, 0, length, java.nio.charset.StandardCharsets.UTF_8));
+                            }
+
+                            String scriptContent = content.toString();
+                            Log.d(TAG, "Extracted script from memory: " + patchId + " (" + scriptContent.length() + " chars)");
+
+                            // Cache the script in memory for future requests
+                            cacheScriptInMemory(patchId, scriptContent);
+                        }
+                    }
+
+                    zis.closeEntry();
+                }
+
+                Log.d(TAG, "Completed memory-only ZIP processing");
+                return "ZIP_PROCESSED"; // Indicator that processing completed
+
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error processing ZIP from memory", e);
+            return null;
+        }
+    }
+
+    // Memory-only script cache (following KeyAuthInjectionManager memory patterns)
+    private final Map<String, String> memoryScriptCache = new ConcurrentHashMap<>();
+
+    private void cacheScriptInMemory(String patchId, String scriptContent) {
+        memoryScriptCache.put(patchId, scriptContent);
+        Log.d(TAG, "Cached script in memory: " + patchId);
+
+        // Schedule automatic cleanup (following KeyAuthInjectionManager pattern)
+        scheduleScriptCleanup(patchId);
+    }
+
+    private void scheduleScriptCleanup(String patchId) {
+        // Clean up script from memory after 30 seconds (same as KeyAuthInjectionManager)
+        CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(30000); // 30 seconds
+                memoryScriptCache.remove(patchId);
+                Log.d(TAG, "Automatic script cleanup completed: " + patchId);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Log.w(TAG, "Script cleanup interrupted: " + patchId);
+            }
+        });
+    }
+
+    private String getScriptFromMemoryCache(String patchId) {
+        return memoryScriptCache.get(patchId);
+    }
+
+    // Old file-based extraction method removed - now using memory-only operations
+    // All ZIP processing is handled in processZipFromMemory() following KeyAuthInjectionManager patterns
 
     /**
      * Get current KeyAuth session ID from SimpleLicenseVerifier
@@ -339,7 +578,7 @@ public class SecureScriptManager {
     private String getKeyAuthSessionId() {
         try {
             // Use reflection to access SimpleLicenseVerifier session
-            Class<?> verifierClass = Class.forName("com.bearmod.auth.SimpleLicenseVerifier");
+            Class<?> verifierClass = Class.forName("com.bearmod.security.SimpleLicenseVerifier");
             java.lang.reflect.Field sessionField = verifierClass.getDeclaredField("sessionId");
             sessionField.setAccessible(true);
             return (String) sessionField.get(null);
@@ -358,15 +597,12 @@ public class SecureScriptManager {
      */
     private boolean verifyScriptSignature(String patchId, String scriptContent) {
         try {
-            String signature = signatureCache.get(patchId);
-            if (signature == null) return true; // If no signature, skip verification
-            // TODO: Implement actual signature verification using KEYAUTH_PUBLIC_KEY
-            // For now, always return true
-            Log.d(TAG, "Verified script signature for: " + patchId);
-            return true;
+            // Use SignatureVerifier for proper RSA verification
+            return SignatureVerifier.verifyScriptSignature(context, patchId, scriptContent);
+
         } catch (Exception e) {
-            Log.e(TAG, "Signature verification error", e);
-            return false;
+            Log.e(TAG, "Signature verification error for " + patchId, e);
+            return false; // Fail-closed: error = reject
         }
     }
 
@@ -444,5 +680,35 @@ public class SecureScriptManager {
                 return false;
             }
         });
+    }
+
+    /**
+     * Fetch signatures from KeyAuth server for script verification
+     * Integrates with existing SimpleLicenseVerifier infrastructure
+     */
+    private void fetchSignaturesFromKeyAuth(String collectionFileId) {
+        try {
+            Log.d(TAG, "Fetching signatures from KeyAuth for collection: " + collectionFileId);
+
+            // Use existing SimpleLicenseVerifier infrastructure
+            SimpleLicenseVerifier.fetchScriptSignatures(context, collectionFileId,
+                new SimpleLicenseVerifier.SignatureFetchCallback() {
+                    @Override
+                    public void onSignaturesFetched(Map<String, String> signatures) {
+                        // Update SignatureVerifier with new signatures
+                        SignatureVerifier.updateSignatures(signatures);
+                        Log.d(TAG, "✅ Updated " + signatures.size() + " signatures from KeyAuth");
+                    }
+
+                    @Override
+                    public void onSignaturesFetchFailed(String error) {
+                        Log.w(TAG, "⚠️ Failed to fetch signatures from KeyAuth: " + error);
+                        Log.d(TAG, "Will use fallback signatures for verification");
+                    }
+                });
+
+        } catch (Exception e) {
+            Log.w(TAG, "Error fetching signatures from KeyAuth", e);
+        }
     }
 }

@@ -148,5 +148,15 @@
     <color name="ios_gray4">#D1D1D6</color>
     <color name="ios_gray5">#E5E5EA</color>
     <color name="ios_gray6">#F2F2F7</color>
-    
+
+    <!-- Missing Legacy Colors for Compatibility -->
+    <color name="red">#FF3B30</color> <!-- iOS Red -->
+    <color name="background">#1C1C1E</color> <!-- iOS Dark Background -->
+    <color name="button">#007AFF</color> <!-- iOS Blue Button -->
+    <color name="blue">#007AFF</color> <!-- iOS Blue -->
+    <color name="secodary">#2C2C2E</color> <!-- iOS Secondary Background (typo preserved) -->
+    <color name="secodary2">#3A3A3C</color> <!-- iOS Secondary Background 2 (typo preserved) -->
+    <color name="startbtn">#30D158</color> <!-- iOS Green Start Button -->
+    <color name="colorPrimary">#007AFF</color> <!-- iOS Blue Primary -->
+
 </resources>

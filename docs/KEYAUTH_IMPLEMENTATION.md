@@ -39,8 +39,8 @@ private static final long EXPONENTIAL_BACKOFF_MULTIPLIER = 2;
 ```
 
 ### API Endpoints
-- Primary: `https://keyauth.win/api/1.2/`
-- Backup: `https://keyauth.cc/api/1.2/`
+- Primary: `https://keyauth.win/api/1.3/`
+- Backup: `https://keyauth.cc/api/1.3/`
 
 ## Usage
 

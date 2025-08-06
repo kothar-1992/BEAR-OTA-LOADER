@@ -10,7 +10,9 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -44,6 +46,9 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.activity.OnBackPressedCallback;
 
 import com.bearmod.ota.OTAUpdateManager;
+import com.bearmod.security.AuthenticationManager;
+import com.bearmod.security.SignatureVerifier;
+import com.bearmod.security.SimpleLicenseVerifier;
 
 /**
  * MainActivity - Main App Activity for BearMod
@@ -143,8 +148,9 @@ public class MainActivity extends AppCompatActivity {
                             showPermissionExplanationDialog();
                         }
                     });
+    private String bearToken;
 
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,9 +160,18 @@ public class MainActivity extends AppCompatActivity {
             new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK) {
-                        // Login successful - start initialization
-                        Log.d(TAG, "Login successful - starting initialization");
-                        startSplashAnimation();
+                        // Login successful - verify authentication with new AuthenticationManager
+                        Log.d(TAG, "Login successful - verifying authentication status");
+
+                        AuthenticationManager authManager = AuthenticationManager.getInstance(MainActivity.this);
+                        if (authManager.isAuthenticated()) {
+                            Log.d(TAG, "Authentication confirmed - starting initialization");
+                            startSplashAnimation();
+                        } else {
+                            // Fallback: If authentication wasn't saved properly, show login again
+                            Log.w(TAG, "Authentication not saved properly - showing login again");
+                            startLoginActivity();
+                        }
                     } else {
                         // Login failed or cancelled - exit app
                         Log.d(TAG, "Login failed or cancelled - exiting");
@@ -169,8 +184,7 @@ public class MainActivity extends AppCompatActivity {
         
         // Load native library first - this matches the original BearMod pattern
         try {
-            System.loadLibrary("BearMod");
-            System.loadLibrary("BEAR");
+            System.loadLibrary("bearmod"); // libclient_static is linked into bearmod
             Log.d(TAG, "Native library loaded successfully in MainActivity");
         } catch (UnsatisfiedLinkError e) {
             Log.e(TAG, "Failed to load native library: " + e.getMessage());
@@ -179,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Unexpected error loading native library: " + e.getMessage());
             // Continue anyway - app can work in demo mode
         }
+        
 
         testHmacGeneration();
         
@@ -452,9 +467,8 @@ public class MainActivity extends AppCompatActivity {
         // TODO: Implement navigation functionality
         if ("Tools".equals(navName)) {
             // Could open tools/settings menu
-        } else if ("Other".equals(navName)) {
-            // Could open additional options
-        }
+        }  // Could open additional options
+
     }
 
     @SuppressLint("SetTextI18n")
@@ -693,12 +707,15 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Check if user needs to login first
-        if (!Launcher.hasValidKey(this)) {
-            Log.d(TAG, "No valid license key - showing login");
+        // Check if user needs to login first using new AuthenticationManager
+        AuthenticationManager authManager = AuthenticationManager.getInstance(this);
+        if (!authManager.isAuthenticated()) {
+            Log.d(TAG, "User not authenticated - showing login");
             startLoginActivity();
             return;
         }
+
+        Log.d(TAG, "User authenticated - " + authManager.getAuthenticationStatus());
 
         // User has valid key - start splash animation and initialization
         startSplashAnimation();
@@ -1004,11 +1021,6 @@ public class MainActivity extends AppCompatActivity {
             if (!antiDetectionManager.verifyAntiDetectionAssets()) {
                 Log.w(TAG, "Anti-detection assets not found - continuing without stealth");
             }
-
-            status.setText("Checking for library updates...");
-
-            // Check for OTA updates before initializing injection system
-            checkOTAUpdates();
 
             status.setText("Initializing KeyAuth injection system...");
 
@@ -1413,71 +1425,7 @@ public class MainActivity extends AppCompatActivity {
     // Simplified permission status methods removed for build fix
     // TODO: Re-implement with PermissionManager when build issues are resolved
 
-    /**
-     * Check for OTA updates before initializing injection system
-     * Updated to use consolidated OTAUpdateManager
-     */
-    private void checkOTAUpdates() {
-        try {
-            Log.d(TAG, "Checking for simplified OTA updates...");
-
-            OTAUpdateManager otaManager = OTAUpdateManager.getInstance(this);
-
-            // Perform simplified OTA update with progress tracking
-            otaManager.checkAndPerformSimplifiedUpdates("com.tencent.ig", new OTAUpdateManager.OTAUpdateCallback() {
-                @Override
-                public void onUpdateCheckStarted() {
-                    runOnUiThread(() -> status.setText("Checking for library updates"));
-                }
-
-                @Override
-                public void onUpdateCheckComplete(java.util.Map<String, OTAUpdateManager.LibraryConfig> updatesNeeded) {
-                    runOnUiThread(() -> {
-                        if (updatesNeeded.isEmpty()) {
-                            status.setText("All libraries up to date");
-                        } else {
-                            status.setText("Downloading " + updatesNeeded.size() + " library updates...");
-                        }
-                    });
-                }
-
-                @Override
-                public void onUpdateProgress(String libraryName, int progress) {
-                    runOnUiThread(() -> status.setText(libraryName + " (" + progress + "%)"));
-                }
-
-                @Override
-                public void onUpdateComplete(String libraryName, boolean success) {
-                    runOnUiThread(() -> {
-                        Log.d(TAG, "OTA update completed: " + libraryName + " = " + success);
-                        status.setText("Library " + libraryName + (success ? " updated" : " failed"));
-                    });
-                }
-
-                @Override
-                public void onUpdateFailed(String error) {
-                    runOnUiThread(() -> {
-                        Log.w(TAG, "OTA update failed - will use fallback methods: " + error);
-                        status.setText("Using fallback library loading");
-                    });
-                }
-
-                @Override
-                public void onAllUpdatesComplete(boolean allSuccessful) {
-                    runOnUiThread(() -> {
-                        Log.d(TAG, "All OTA updates completed: " + allSuccessful);
-                        status.setText(allSuccessful ? "All libraries updated successfully" : "Some library updates failed");
-                    });
-                }
-
-
-            });
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error initializing simplified OTA update check", e);
-            status.setText("OTA system unavailable - using fallback");
-        }
-    }
+    // OTA update logic moved to KeyAuthInjectionManager for proper separation of concerns
 
     /**
      * Initialize KeyAuth injection system after successful authentication
@@ -1778,6 +1726,7 @@ public class MainActivity extends AppCompatActivity {
      * Start injection process using MundoCore with KeyAuth library downloads
      * Floating service will be automatically started by successful injection
      */
+    @SuppressLint("SetTextI18n")
     private void startInjectionProcess() {
         new Thread(() -> {
             try {
@@ -1806,6 +1755,9 @@ public class MainActivity extends AppCompatActivity {
                                 downloadComplete[0] = true;
                                 downloadComplete.notify();
                             }
+
+                            // Start floating overlay after successful patch/library download
+                            runOnUiThread(() -> startFloatingOverlay("FridaPatch", result));
                         }
 
                         @Override
@@ -1818,6 +1770,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
 
+                        @SuppressLint("SetTextI18n")
                         @Override
                         public void onPatchProgress(int progress) {
                             Log.d(TAG, "Download progress: " + progress + "%");
@@ -1852,14 +1805,65 @@ public class MainActivity extends AppCompatActivity {
                     android.widget.Toast.makeText(this, "Initializing injection system...", android.widget.Toast.LENGTH_SHORT).show();
                 });
 
+                // Get stored tokens for mundo_core initialization
+                SharedPreferences prefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
+                String keyAuthToken = prefs.getString("KEYAUTH_TOKEN", "demo_keyauth_token");
+                String bearToken = prefs.getString("USER_KEY", "demo_bear_token");
+
                 MundoCore mundoCore = MundoCore.getInstance(this);
                 if (!mundoCore.isInitialized()) {
-                    Log.w(TAG, "MundoCore not initialized - attempting initialization");
-                    // MundoCore should be initialized in LauncherLoginActivity
-                    // If not initialized, injection will fail gracefully
+                    Log.w(TAG, "MundoCore not initialized - attempting initialization now");
+
+                    try {
+                        // Create configuration for MundoCore initialization with real tokens
+                        MundoCore.MundoConfig config = new MundoCore.MundoConfig(
+                                keyAuthToken,  // Use retrieved KeyAuth token
+                                bearToken      // Use stored license key as bearToken
+                        );
+
+                        // Set target package for injection
+                        config.targetPackage = selectedTargetPackage;
+                        config.securityLevel = 2;  // Maximum security
+                        config.enableNonRoot = true;
+                        config.enableAntiHook = true;
+                        config.enableStealth = true;
+
+                        // Attempt initialization
+                        runOnUiThread(() -> {
+                            android.widget.Toast.makeText(this, "Initializing mundo_core...", android.widget.Toast.LENGTH_SHORT).show();
+                        });
+
+                        MundoCore.MundoInitResult result = mundoCore.initialize(config);
+
+                        if (!result.success) {
+                            Log.e(TAG, "MundoCore initialization failed: " + result.message);
+                            runOnUiThread(() -> {
+                                android.widget.Toast.makeText(this, "Injection system initialization failed: " + result.message, android.widget.Toast.LENGTH_LONG).show();
+                                if (countdownSeconds != null) {
+                                    countdownSeconds.setText("ERROR");
+                                }
+                            });
+                            return; // Exit injection process
+                        }
+
+                        Log.i(TAG, "MundoCore initialized successfully - Version: " + result.version);
+                        runOnUiThread(() -> {
+                            android.widget.Toast.makeText(this, "Injection system ready - " + result.version, android.widget.Toast.LENGTH_SHORT).show();
+                        });
+
+                    } catch (Exception e) {
+                        Log.e(TAG, "Exception during MundoCore initialization", e);
+                        runOnUiThread(() -> {
+                            android.widget.Toast.makeText(this, "Critical error: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                            if (countdownSeconds != null) {
+                                countdownSeconds.setText("FAILED");
+                            }
+                        });
+                        return; // Exit injection process
+                    }
                 }
 
-                // Step 3: Perform injection using MundoCore
+                // Step 3: Perform injection using priority order
                 runOnUiThread(() -> {
                     android.widget.Toast.makeText(this, "Starting injection...", android.widget.Toast.LENGTH_SHORT).show();
                     if (countdownSeconds != null) {
@@ -1867,32 +1871,26 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-                boolean injectionSuccess = mundoCore.injectToPackage(selectedTargetPackage);
+                // Priority 1: Try KeyAuth injection system first (if available and ready)
+                com.bearmod.injection.KeyAuthInjectionManager keyAuthManager =
+                    com.bearmod.injection.KeyAuthInjectionManager.getInstance();
 
-                runOnUiThread(() -> {
-                    if (injectionSuccess) {
-                        // Injection successful - floating service will start automatically
-                        isServiceRunning = true;
-                        updateServiceStatus();
+                boolean keyAuthAvailable = keyAuthManager.isInjectionReady();
+                Log.d(TAG, "BearMod injection system available: " + keyAuthAvailable);
 
-                        Log.d(TAG, "Injection successful - floating service should start automatically");
-                        android.widget.Toast.makeText(this, "Injection successful! Mod active.", android.widget.Toast.LENGTH_SHORT).show();
-
-                        if (countdownSeconds != null) {
-                            countdownSeconds.setText("DONE");
-                        }
-
-                    } else {
-                        // Injection failed
-                        String error = mundoCore.getLastError();
-                        Log.e(TAG, "Injection failed: " + error);
-                        android.widget.Toast.makeText(this, "Injection failed: " + error, android.widget.Toast.LENGTH_LONG).show();
-
-                        if (countdownSeconds != null) {
-                            countdownSeconds.setText("FAIL");
-                        }
+                if (keyAuthAvailable) {
+                    Log.d(TAG, "Using BearMod injection system (Priority 1)");
+                    // Use KeyAuth injection system
+                    performKeyAuthInjection(keyAuthManager, bearToken);
+                } else {
+                    Log.d(TAG, "BearMod not available, falling back to HybridInjectionManager (Priority 2)");
+                    // Priority 2: Fallback to HybridInjectionManager
+                    com.bearmod.injection.HybridInjectionManager hybridManager = com.bearmod.injection.HybridInjectionManager.getInstance();
+                    if (!hybridManager.isInitialized()) {
+                        hybridManager.initialize(this);
                     }
-                });
+                    performHybridInjection(hybridManager, bearToken);
+                }
 
             } catch (Exception e) {
                 Log.e(TAG, "Error during injection process", e);
@@ -1901,6 +1899,227 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         }).start();
+    }
+
+    /**
+     * Perform injection using KeyAuth injection system (Priority 1)
+     */
+    private void performKeyAuthInjection(com.bearmod.injection.KeyAuthInjectionManager keyAuthManager, String bearToken) {
+        try {
+            Log.d(TAG, "Attempting BearMod injection for: " + selectedTargetPackage);
+
+            // Use KeyAuth injection system with proper callback
+            keyAuthManager.performInjection(this, selectedTargetPackage, bearToken,
+                new com.bearmod.injection.KeyAuthInjectionManager.InjectionCallback() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onInjectionStarted() {
+                        Log.d(TAG, "BearMod injection started");
+                        runOnUiThread(() -> {
+                            if (countdownSeconds != null) {
+                                countdownSeconds.setText("BearMod");
+                            }
+                        });
+                    }
+
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onInjectionProgress(int progress, String message) {
+                        Log.d(TAG, "BearMod injection progress: " + progress + "% - " + message);
+                        runOnUiThread(() -> {
+                            if (countdownSeconds != null) {
+                                countdownSeconds.setText(progress + "%");
+                            }
+                        });
+                    }
+
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onInjectionSuccess(com.bearmod.patch.model.PatchResult result) {
+                        Log.d(TAG, "BearMod injection successful: " + result.getMessage());
+                        runOnUiThread(() -> {
+                            // KeyAuth injection successful
+                            isServiceRunning = true;
+                            updateServiceStatus();
+
+                            android.widget.Toast.makeText(MainActivity.this, "KeyAuth injection successful! Mod active.", android.widget.Toast.LENGTH_SHORT).show();
+
+                            if (countdownSeconds != null) {
+                                countdownSeconds.setText("DONE");
+                            }
+
+                            // Start floating overlay after successful injection
+                            startFloatingOverlay("BearMod", result);
+                        });
+                    }
+
+                    @Override
+                    public void onInjectionFailed(String error) {
+                        Log.w(TAG, "BearMod injection failed: " + error + " - trying HybridInjectionManager fallback");
+                        runOnUiThread(() -> {
+                            performHybridInjectionFallback(bearToken);
+                        });
+                    }
+                });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error during KeyAuth injection", e);
+            runOnUiThread(() -> {
+                Log.w(TAG, "BearMod injection error - trying HybridInjectionManager fallback");
+                performHybridInjectionFallback(bearToken);
+            });
+        }
+    }
+
+    /**
+     * Perform injection using HybridInjectionManager (Priority 2)
+     */
+    private void performHybridInjection(com.bearmod.injection.HybridInjectionManager hybridManager, String bearToken) {
+        try {
+            Log.d(TAG, "Attempting HybridInjectionManager injection for: " + selectedTargetPackage);
+
+            hybridManager.performHybridInjection(selectedTargetPackage,
+                bearToken,
+                "bearmod-injection",
+                new com.bearmod.injection.HybridInjectionManager.InjectionCallback() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onInjectionStarted(String targetPackage) {
+                        Log.d(TAG, "Hybrid injection started for: " + targetPackage);
+                        runOnUiThread(() -> {
+                            if (countdownSeconds != null) {
+                                countdownSeconds.setText("HYBRID");
+                            }
+                        });
+                    }
+
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onInjectionProgress(String targetPackage, int progress, String message) {
+                        Log.d(TAG, "Hybrid injection progress: " + progress + "% - " + message);
+                        runOnUiThread(() -> {
+                            if (countdownSeconds != null) {
+                                countdownSeconds.setText(progress + "%");
+                            }
+                        });
+                    }
+
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onInjectionSuccess(String targetPackage, com.bearmod.patch.model.PatchResult result) {
+                        Log.d(TAG, "Hybrid injection successful: " + result.getMessage());
+                        runOnUiThread(() -> {
+                            // Hybrid injection successful
+                            isServiceRunning = true;
+                            updateServiceStatus();
+
+                            android.widget.Toast.makeText(MainActivity.this, "Hybrid injection successful! Mod active.", android.widget.Toast.LENGTH_SHORT).show();
+
+                            if (countdownSeconds != null) {
+                                countdownSeconds.setText("DONE");
+                            }
+
+                            // Start floating overlay after successful injection
+                            startFloatingOverlay("Hybrid", result);
+                        });
+                    }
+
+                    @Override
+                    public void onInjectionFailed(String targetPackage, String error) {
+                        Log.e(TAG, "Hybrid injection failed: " + error + " - trying NonRootPatchManager fallback");
+                        runOnUiThread(() -> {
+                            performNonRootPatchManagerFallback(bearToken);
+                        });
+                    }
+                });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error during Hybrid injection", e);
+            runOnUiThread(() -> {
+                Log.w(TAG, "Hybrid injection error - trying NonRootPatchManager fallback");
+                performNonRootPatchManagerFallback(bearToken);
+            });
+        }
+    }
+
+    /**
+     * Fallback method for HybridInjectionManager (called from KeyAuth failure)
+     */
+    private void performHybridInjectionFallback(String bearToken) {
+        Log.d(TAG, "Starting HybridInjectionManager fallback");
+
+        com.bearmod.injection.HybridInjectionManager hybridManager = com.bearmod.injection.HybridInjectionManager.getInstance();
+        if (!hybridManager.isInitialized()) {
+            hybridManager.initialize(this);
+        }
+
+        performHybridInjection(hybridManager, bearToken);
+    }
+
+    /**
+     * Final fallback using NonRootPatchManager (Priority 3)
+     */
+    @SuppressLint("SetTextI18n")
+    private void performNonRootPatchManagerFallback(String bearToken) {
+        this.bearToken = bearToken;
+        try {
+            Log.d(TAG, "Starting NonRootPatchManager fallback injection for: " + selectedTargetPackage);
+
+            runOnUiThread(() -> {
+                if (countdownSeconds != null) {
+                    countdownSeconds.setText("PATCH");
+                }
+                android.widget.Toast.makeText(this, "Trying traditional patch method...", android.widget.Toast.LENGTH_SHORT).show();
+            });
+
+            // Use MundoCore as the final fallback
+            MundoCore mundoCore = MundoCore.getInstance(this);
+            if (mundoCore.isInitialized()) {
+                boolean success = mundoCore.injectToPackage(selectedTargetPackage);
+
+                runOnUiThread(() -> {
+                    if (success) {
+                        // Final fallback successful
+                        isServiceRunning = true;
+                        updateServiceStatus();
+
+                        Log.d(TAG, "NonRootPatchManager fallback successful");
+                        android.widget.Toast.makeText(this, "Patch injection successful! Mod active.", android.widget.Toast.LENGTH_SHORT).show();
+
+                        if (countdownSeconds != null) {
+                            countdownSeconds.setText("DONE");
+                        }
+                    } else {
+                        // All injection methods failed
+                        Log.e(TAG, "All injection methods failed");
+                        android.widget.Toast.makeText(this, "All injection methods failed. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+
+                        if (countdownSeconds != null) {
+                            countdownSeconds.setText("FAIL");
+                        }
+                    }
+                });
+            } else {
+                runOnUiThread(() -> {
+                    Log.e(TAG, "MundoCore not initialized - all injection methods exhausted");
+                    android.widget.Toast.makeText(this, "Injection system not available. Please restart app.", android.widget.Toast.LENGTH_LONG).show();
+
+                    if (countdownSeconds != null) {
+                        countdownSeconds.setText("ERROR");
+                    }
+                });
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error during NonRootPatchManager fallback", e);
+            runOnUiThread(() -> {
+                android.widget.Toast.makeText(this, "Final injection attempt failed: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+
+                if (countdownSeconds != null) {
+                    countdownSeconds.setText("ERROR");
+                }
+            });
+        }
     }
 
     /**
@@ -2159,5 +2378,53 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Patch completed: " + result);
             }
         });
+    }
+
+    /**
+     * Start floating overlay after successful injection
+     * Connects the injection system to the existing ImGui floating overlay system
+     */
+    private void startFloatingOverlay(String injectionType, com.bearmod.patch.model.PatchResult result) {
+        try {
+            Log.d(TAG, "Starting floating overlay after " + injectionType + " injection success");
+
+            // Check overlay permission first
+            if (!android.provider.Settings.canDrawOverlays(this)) {
+                Log.w(TAG, "Overlay permission not granted - cannot start floating overlay");
+                android.widget.Toast.makeText(this,
+                    "Overlay permission required for floating menu",
+                    android.widget.Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            // Start the existing ImGui floating overlay system
+            ImGui floatingOverlay = new ImGui(this);
+            Log.d(TAG, "Floating overlay started successfully for " + injectionType + " injection");
+
+            // Show success notification
+            android.widget.Toast.makeText(this,
+                "Floating menu activated! " + injectionType + " injection complete.",
+                android.widget.Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start floating overlay after " + injectionType + " injection", e);
+            android.widget.Toast.makeText(this,
+                "Warning: Floating menu failed to start",
+                android.widget.Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * DEVELOPMENT HELPER: Call this once to get certificate extraction commands
+     * Remove this method in production builds
+     */
+    private void setupProductionSignatures() {
+        if (BuildConfig.DEBUG) {
+            // Extract certificate information
+            SignatureVerifier.extractCertificateInfo(this);
+
+            // Generate signature helpers
+            SimpleLicenseVerifier.generateSignaturesForAssets(this);
+        }
     }
 }

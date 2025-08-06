@@ -1,52 +1,16 @@
 {
-  "version": "1.1.0",
-  "lastUpdated": "2025-08-01T23:59:00Z",
-  "description": "BearMod Library Version Manifest - Automatic OTA Updates",
-  "libraries": {
-    "libhelper_64bit.zip": {
-      "version": "1.1.0",
-      "fileId": "306996",
-      "description": "64-bit helper library with Frida Gadget",
-      "architecture": "arm64-v8a",
-      "hash": "sha256:placeholder_hash_64bit",
-      "size": 10485760,
-      "required": true
+  "loader": {
+    "BEARMOD_CORE": {
+      "gamename": "BEARMOD_CORE",
+      "name": "libbearmod.so",
+      "path or fileid": "849386",
+      "version": 1
     },
-    "libhelper_32bit.zip": {
-      "version": "1.1.0",
-      "fileId": "526490", 
-      "description": "32-bit helper library with Frida Gadget",
-      "architecture": "armeabi-v7a",
-      "hash": "sha256:placeholder_hash_32bit",
-      "size": 7864320,
-      "required": true
-    },
-    "libear.zip": {
-      "version": "1.1.0",
-      "fileId": "794554",
-      "description": "BearMod core library (libBEAR.so)",
-      "architecture": "universal",
-      "hash": "sha256:placeholder_hash_bear",
-      "size": 6750000,
-      "required": true
-    },
-    "libmundo.zip": {
-      "version": "1.1.0", 
-      "fileId": "386232",
-      "description": "Mundo core API bridge library",
-      "architecture": "universal",
-      "hash": "sha256:placeholder_hash_mundo",
-      "size": 307600,
-      "required": true
+    "MUNDO_CORE": {
+      "gamename": "MUNDO_CORE",
+      "name": "libmundo.so",
+      "path or fileid": "386232",
+      "version": 1
     }
-  },
-  "minimumAppVersion": "1.0.0",
-  "updateNotes": [
-    "Fixed injection stability issues",
-    "Improved anti-detection mechanisms", 
-    "Updated Frida Gadget to latest version",
-    "Enhanced memory management"
-  ],
-  "rollbackVersion": "1.0.0",
-  "emergencyDisable": false
+  }
 }

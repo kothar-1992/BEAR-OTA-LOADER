@@ -9,6 +9,7 @@ import android.webkit.WebView;
 import com.bearmod.patch.model.PatchResult;
 
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -201,32 +202,34 @@ public class JSEnginePatchManager {
     
     private String loadBaseFramework(Context context) {
         this.context = context;
-        return "console.log = function(msg) { BearModPatch.log(msg); };\n" +
-               "var Java = {\n" +
-               "  use: function(className) {\n" +
-               "    return {\n" +
-               "      implementation: function(methodName, impl) {\n" +
-               "        return BearModPatch.hookMethod(className, methodName, impl.toString());\n" +
-               "      }\n" +
-               "    };\n" +
-               "  }\n" +
-               "};\n";
+        return """
+                console.log = function(msg) { BearModPatch.log(msg); };
+                var Java = {
+                  use: function(className) {
+                    return {
+                      implementation: function(methodName, impl) {
+                        return BearModPatch.hookMethod(className, methodName, impl.toString());
+                      }
+                    };
+                  }
+                };
+                """;
     }
     
     private String loadPatchScript(Context context, String patchId) {
         try {
-            // Use SecureScriptManager for KeyAuth-based script delivery
+            // Use SecureScriptManager with centralized FileHelper system
             String scriptContent = SecureScriptManager.getInstance(context).loadScript(patchId);
             if (scriptContent != null) {
-                Log.d(TAG, "Loaded script from KeyAuth secure delivery: " + patchId);
+                Log.d(TAG, "Loaded script from centralized system: " + patchId + " (" + scriptContent.length() + " chars)");
                 return scriptContent;
             }
 
-            Log.e(TAG, "Failed to load script from KeyAuth: " + patchId);
+            Log.e(TAG, "Failed to load script from centralized system: " + patchId);
             return null;
 
         } catch (Exception e) {
-            Log.e(TAG, "Error loading patch script from KeyAuth", e);
+            Log.e(TAG, "Error loading patch script from centralized system", e);
             return null;
         }
     }
@@ -338,7 +341,7 @@ public class JSEnginePatchManager {
                 patchData = hexStringToByteArray(hexString);
             } else {
                 // String to bytes
-                patchData = newValue.getBytes("UTF-8");
+                patchData = newValue.getBytes(StandardCharsets.UTF_8);
             }
 
             // Call native memory patching function
@@ -415,6 +418,6 @@ public class JSEnginePatchManager {
     private native boolean injectCodeNative(String methodPath, long offset);
 
     // Add fields for tracking hooks and methods
-    private java.util.Map<String, Method> originalMethods = new java.util.HashMap<>();
+    private final java.util.Map<String, Method> originalMethods = new java.util.HashMap<>();
     private java.util.Map<String, String> activeHooks = new java.util.HashMap<>();
 }

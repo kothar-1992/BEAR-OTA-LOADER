@@ -27,10 +27,9 @@ public class KeyAuthInjectionManager {
     private static final String[] REQUIRED_LIBRARIES = {
         "libbearmod.so",           // BearMod core with integrated bypass functionality
         "libmundo.so"              // Mundo core API system
-        // Removed: libhelper libraries (not built), libbear.zip (integrated into libbearmod)
-        // Updated: Changed from .zip to .so to match current library system
     };
-    
+    private Context context = null;
+
     private KeyAuthInjectionManager() {
         this.executor = Executors.newSingleThreadExecutor();
         this.runtimeMonitor = RuntimeMonitor.getInstance();
@@ -61,6 +60,7 @@ public class KeyAuthInjectionManager {
     public CompletableFuture<Boolean> initializeAfterAuth(Context context) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                this.context = context; // Store context for OTA integration
                 Log.d(TAG, "Initializing KeyAuth injection system with enhanced OTA updates");
 
                 // Use enhanced OTA system for automatic library updates (independent of target game selection)
@@ -204,26 +204,43 @@ public class KeyAuthInjectionManager {
     
     /**
      * Load libmundo.so as bridge for mundo_core API
+     * Integrated with OTA system for library buffer retrieval
      */
     private boolean loadMundoBridge() {
         try {
-            // TODO: Implement library buffer retrieval from OTA system
-            Log.d(TAG, "Loading libmundo.so bridge library");
+            Log.d(TAG, "Loading libmundo.so bridge library from OTA system");
 
-            // For now, assume library loading succeeds (OTA system manages libraries)
-            // In future, integrate with OTA system to get library buffers
-            boolean loaded = true; // nativeLoadLibraryFromMemory(mundoBuffer, "libmundo.so");
-            
-            if (loaded) {
-                Log.d(TAG, "libmundo.so bridge loaded successfully");
-                return true;
-            } else {
-                Log.e(TAG, "Failed to load libmundo.so bridge");
+            // Get OTA manager instance
+            OTAUpdateManager otaManager = OTAUpdateManager.getInstance(context);
+
+            // Retrieve library buffer from OTA system
+            byte[] mundoBuffer = otaManager.getLibraryBuffer("libmundo.so");
+
+            if (mundoBuffer == null) {
+                Log.e(TAG, "Failed to retrieve libmundo.so buffer from OTA system");
                 return false;
             }
-            
+
+            Log.d(TAG, "Retrieved libmundo.so buffer: " + mundoBuffer.length + " bytes");
+
+            // Convert byte array to ByteBuffer for native method
+            ByteBuffer mundoByteBuffer = ByteBuffer.allocateDirect(mundoBuffer.length);
+            mundoByteBuffer.put(mundoBuffer);
+            mundoByteBuffer.flip();
+
+            // Load library from memory buffer using native method
+            boolean loaded = nativeLoadLibraryFromMemory(mundoByteBuffer, "libmundo.so");
+
+            if (loaded) {
+                Log.d(TAG, "libmundo.so bridge loaded successfully from memory");
+                return true;
+            } else {
+                Log.e(TAG, "Failed to load libmundo.so from memory buffer");
+                return false;
+            }
+
         } catch (Exception e) {
-            Log.e(TAG, "Error loading mundo bridge", e);
+            Log.e(TAG, "Error loading mundo bridge from OTA system", e);
             return false;
         }
     }

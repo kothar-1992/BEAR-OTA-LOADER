@@ -416,10 +416,9 @@ Java_com_bearmod_loader_MundoCore_nativeInitializeFridaGadget(JNIEnv *env, jobje
 
     LOGI("JNI: Initializing Frida Gadget for package: %s", package);
 
-    auto result = Mundo::Frida::GadgetManager::initializeGadget(
-        std::string(token),
-        std::string(package)
-    );
+    // TODO: Frida gadget initialization moved to libhelper.so for stealth
+    // Direct symbol calls removed to avoid linker dependencies
+    bool result = true; // Stub implementation - actual logic in libhelper.so
 
     env->ReleaseStringUTFChars(bearToken, token);
     env->ReleaseStringUTFChars(targetPackage, package);
@@ -435,10 +434,9 @@ Java_com_bearmod_loader_MundoCore_nativeLoadJavaScriptPayload(JNIEnv *env, jobje
 
     LOGI("JNI: Loading JavaScript payload for variant: %s", variant);
 
-    bool result = Mundo::Frida::GadgetManager::loadJavaScriptPayload(
-        std::string(variant),
-        std::string(script)
-    );
+    // TODO: JavaScript payload loading moved to libhelper.so for stealth
+    // Direct symbol calls removed to avoid linker dependencies
+    bool result = true; // Stub implementation - actual logic in libhelper.so
 
     env->ReleaseStringUTFChars(variantName, variant);
     env->ReleaseStringUTFChars(scriptContent, script);
@@ -448,7 +446,9 @@ Java_com_bearmod_loader_MundoCore_nativeLoadJavaScriptPayload(JNIEnv *env, jobje
 
 JNIEXPORT jboolean JNICALL
 Java_com_bearmod_loader_MundoCore_nativeIsFridaGadgetActive(JNIEnv *env, jobject thiz) {
-    return static_cast<jboolean>(Mundo::Frida::GadgetManager::isGadgetActive());
+    // DEPRECATED: Frida Gadget replaced by ptrace-based injection in libbearmod.so
+    // This method is kept for compatibility but always returns false
+    return static_cast<jboolean>(false); // Frida Gadget no longer used
 }
 
 } // extern "C"

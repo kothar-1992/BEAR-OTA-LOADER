@@ -1,15 +1,15 @@
 package com.bearmod.security;
 
 import android.content.Intent;
-import com.google.gson.Gson;
+import org.json.JSONObject;
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Secure Intent manager for encrypted Plugin-to-BearMod communication
  * This class handles decryption of authentication data from Plugin
  */
 public class SecureIntentManager {
-    private static final Gson gson = new Gson();
     private static final String SECURITY_VERSION = "1.0";
     private static final long INTENT_TIMEOUT_MS = 30000; // 30 seconds
     
@@ -29,9 +29,16 @@ public class SecureIntentManager {
             }
             
             String jsonData = AESUtil.decryptFromPlugin(encryptedPayload);
-            
-            @SuppressWarnings("unchecked")
-            Map<String, String> data = gson.fromJson(jsonData, Map.class);
+
+            // Parse JSON data using JSONObject instead of Gson
+            JSONObject jsonObject = new JSONObject(jsonData);
+            Map<String, String> data = new HashMap<>();
+
+            // Convert JSONObject to Map
+            for (java.util.Iterator<String> keys = jsonObject.keys(); keys.hasNext(); ) {
+                String key = keys.next();
+                data.put(key, jsonObject.getString(key));
+            }
             
             // Verify timestamp (prevent replay attacks)
             String timestampStr = data.get("timestamp");

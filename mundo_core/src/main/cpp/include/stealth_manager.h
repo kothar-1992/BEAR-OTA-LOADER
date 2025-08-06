@@ -46,7 +46,8 @@ public:
         std::vector<std::string> hiddenFilePatterns;
     };
     
-    explicit StealthManager(const Config& config = Config{});
+    StealthManager(); // Default constructor with default config
+    explicit StealthManager(const Config& config);
     ~StealthManager();
     
     // Main stealth operations

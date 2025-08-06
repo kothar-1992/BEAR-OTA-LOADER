@@ -12,6 +12,8 @@
 #include "Includes/Utils.h"
 #include "Includes/Macros.h"
 
+// Forward declaration for BearMod JNI initialization
+extern bool initializeBearModJNI(JavaVM* vm, JNIEnv* env);
 #include <fstream>
 #include <fcntl.h>
 
@@ -55,18 +57,17 @@ void setValues(uintptr_t address, int flags, int value, bool freeze) {
 setMemoryValue(address, value);
 }
 
-
-
 size_t BEAR(const char *s) {
     static const std::unordered_map<std::string, std::string> rep_Yummy = {
-  {"mrpcs_abort.dat", "0000"}, 
-    {"OJWV_GN]J", "0000"}
- };
+        {"mrpcs_abort.dat", "0000"}, 
+        {"OJWV_GN]J", "0000"}
+    };
     auto Yummy_Hex = rep_Yummy.find(s);
     if (Yummy_Hex != rep_Yummy.end()) {
-  strcpy((char *)s, Yummy_Hex->second.c_str());
+        strcpy((char *)s, Yummy_Hex->second.c_str());
+        return strlen(s);
     }
-    return BEAR(s);
+    return strlen(s); // fallback or original logic
 }
 
 
@@ -79,7 +80,6 @@ sleep(1);
 
 //HOOK_LIB_NO_ORIG("libUE4.so", "0x0", BEAR);
 //HOOK_LIB_NO_ORIG("libanogs.so", "0xdfba0", strlen); //strlen
-
 
 /*
 HOOK_LIB("libanogs.so", "0x1672E8", hsub_1672E8, sub_1672E8);
@@ -107,27 +107,6 @@ MemoryPatch::createWithHex("libanogs.so", 0xdf9c0, "00 00 80 D2 C0 03 5F D6").Mo
 MemoryPatch::createWithHex("libanogs.so", 0xdfae0, "00 00 80 D2 C0 03 5F D6").Modify();//16 sym.imp.__fgets_chk
 MemoryPatch::createWithHex("libanogs.so", 0xdfa60, "00 00 80 D2 C0 03 5F D6").Modify();//16 sym.imp.__strlcpy_chk
 MemoryPatch::createWithHex("libanogs.so", 0xdfb70, "00 00 80 D2 C0 03 5F D6").Modify();//16 sym.imp.__strcat_chk
-
-MemoryPatch::createWithHex("libanogs.so", 0xDEF40, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDEF50, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF0A0, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF180, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF280, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF2F0, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF360, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF3B0, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF610, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF7B0, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF880, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF8B0, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF970, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDF9C0, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDFA20, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDFA60, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDFA80, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDFAD0, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDFAE0, "00 00 80 D2 C0 03 5F D6").Modify();
-MemoryPatch::createWithHex("libanogs.so", 0xDFB30, "00 00 80 D2 C0 03 5F D6").Modify();
 
 MemoryPatch::createWithHex("libanogs.so", 0xDFB60, "00 00 80 D2 C0 03 5F D6").Modify();
 MemoryPatch::createWithHex("libanogs.so", 0xDFB70, "00 00 80 D2 C0 03 5F D6").Modify();
@@ -165,14 +144,21 @@ JNIEXPORT int JNI_OnLoad(JavaVM* vm, void* reserved) {
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
     }
-    
-   if (Register(env) != 0)
+
+    // Initialize BearMod JNI system (from bearmod_jni.cpp)
+    if (!initializeBearModJNI(vm, env)) {
+        return JNI_ERR;
+    }
+
+    // Register BYPASS native methods
+    if (Register(env) != 0)
         return -1;
-        
-        pthread_t t;
-      pthread_create(&t, 0, IsAntiCheat2, 0);// safe
-      
-   return JNI_VERSION_1_6;
+
+    // Start anti-cheat bypass thread
+    pthread_t t;
+    pthread_create(&t, 0, IsAntiCheat2, 0);// safe
+
+    return JNI_VERSION_1_6;
 }
 
 

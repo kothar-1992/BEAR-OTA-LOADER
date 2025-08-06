@@ -1,38 +1,54 @@
 LOCAL_PATH := $(call my-dir)
-MAIN_LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE    := BEAR
+LOCAL_MODULE := libclient_static
 
-LOCAL_CFLAGS := -Wno-error=format-security -fvisibility=hidden -ffunction-sections -fdata-sections -w
-LOCAL_CFLAGS += -fno-rtti -fno-exceptions -fpermissive
-LOCAL_CPPFLAGS := -Wno-error=format-security -fvisibility=hidden -ffunction-sections -fdata-sections -w -Werror -s
-LOCAL_CPPFLAGS += -Wno-error=c++11-narrowing -fms-extensions -fno-rtti -fno-exceptions -fpermissive
-LOCAL_LDFLAGS += -Wl,--gc-sections,--strip-all, -llog 
-LOCAL_ARM_MODE := arm
-LOCAL_CPPFLAGS += -w -std=c++17
+LOCAL_CPPFLAGS := -w -std=c++17 -Wno-error=format-security -fvisibility=hidden -ffunction-sections -fdata-sections -fno-rtti -fpermissive
+LOCAL_CFLAGS   := -Wno-error=format-security -fvisibility=hidden -ffunction-sections -fdata-sections -fno-rtti -fpermissive
+LOCAL_LDFLAGS  := -Wl,--gc-sections,--strip-all
 
-LOCAL_C_INCLUDES += $(MAIN_LOCAL_PATH)
+# Debug vs Release
+ifeq ($(APP_OPTIM),debug)
+    LOCAL_CPPFLAGS += -DDEBUG_BUILD -g -O0
+else
+    LOCAL_CPPFLAGS += -DPRODUCTION_BUILD -Os -fomit-frame-pointer
+endif
 
-LOCAL_LDFLAGS := -landroid -llog -lz
-LOCAL_SRC_FILES 		:=  BYPASS.cpp \
-                         patch/KittyMemory.cpp \
-	                     patch/MemoryPatch.cpp \
-                         patch/MemoryBackup.cpp \
-                         patch/KittyUtils.cpp \
-                         Substrate/hde64.c \
-                         Substrate/SubstrateDebug.cpp \
-                         Substrate/SubstrateHook.cpp \
-                         Substrate/SubstratePosixMemory.cpp \
-                         Substrate/And64InlineHook.cpp \
+LOCAL_SRC_FILES := \
+    BYPASS.cpp \
+    bearmod_jni.cpp \
+    security_verifier.cpp \
+    injection.cpp \
+    Includes/Utils.cpp \
+    patch/KittyMemory.cpp \
+    patch/MemoryPatch.cpp \
+    patch/MemoryBackup.cpp \
+    patch/KittyUtils.cpp \
+    Substrate/hde64.c \
+    Substrate/SubstrateDebug.cpp \
+    Substrate/SubstrateHook.cpp \
+    Substrate/SubstratePosixMemory.cpp \
+    Substrate/And64InlineHook.cpp \
+    anti_hook/anti_hook.cpp \
+    anti_hook/gadget_detector.cpp \
+    anti_hook/memory_protector.cpp \
+    nonroot/nonroot_injector.cpp \
+    nonroot/anti_detection_manager.cpp
+    
+    # Removed obsolete Frida Gadget components (replaced by ptrace-based injection):
+    # nonroot/frida_gadget_manager.cpp
+    # nonroot/gadget_obfuscator.cpp
+    # nonroot/objection_patcher.cpp
 
-        
+LOCAL_C_INCLUDES := \
+    $(LOCAL_PATH) \
+    $(LOCAL_PATH)/Includes \
+    $(LOCAL_PATH)/Substrate \
+    $(LOCAL_PATH)/patch \
+    $(LOCAL_PATH)/anti_hook \
+    $(LOCAL_PATH)/nonroot \
+    $(LOCAL_PATH)/../Data_Folder/Includes/patch
 
-LOCAL_CPP_FEATURES                      := exceptions
-include $(BUILD_SHARED_LIBRARY)
-
-
-
-
-
-
+# Exception handling required for ptrace injection error handling and JNI integration
+LOCAL_CPP_FEATURES := exceptions
+include $(BUILD_STATIC_LIBRARY)

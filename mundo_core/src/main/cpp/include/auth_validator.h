@@ -58,8 +58,8 @@ class AuthValidator {
 public:
     // Configuration
     struct Config {
-        std::string baseUrl = "https://keyauth.win/api/1.2/";
-        std::string appName = "BearMod";
+        std::string baseUrl = "https://keyauth.win/api/1.3/";
+        std::string appName = "com.bearmod";
         std::string appSecret = "your_app_secret_here";
         std::string appVersion = "1.3.0";
         int connectionTimeoutMs = 10000;

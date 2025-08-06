@@ -632,7 +632,7 @@ void MenuDraw(bool MenuOnOff) {
    if (IsBall){
             ImGui::SetWindowSize("BEAR", {0, 0},ImGuiCond_FirstUseEver );
         } else{
-            ImGui::SetWindowSize("BEAR", {m_Width, m_Height},ImGuiCond_FirstUseEver );
+            ImGui::SetWindowSize("BEAR", {static_cast<float>(m_Width), static_cast<float>(m_Height)},ImGuiCond_FirstUseEver );
         BallSwitch = true;
         }
 

@@ -1,6 +1,5 @@
 {
     "recommendations": [
-        "augment.vscode-augment",
         "ms-vscode.cpptools-extension-pack",
         "vscjava.vscode-java-pack"
     ]

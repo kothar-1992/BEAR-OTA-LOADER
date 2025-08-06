@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * AssetExtractor - Extract JavaScript payloads from assets to cache directory
@@ -32,17 +34,10 @@ public class AssetExtractor {
                 return false;
             }
             
-            // Extract libhelper.so (obfuscated Frida Gadget)
-            String gadgetAsset = "frida/libhelper.so";
-            String gadgetOutput = workingDir + "/libhelper.so";
-            
-            if (extractAssetFile(context, gadgetAsset, gadgetOutput)) {
-                Log.d(TAG, "Frida Gadget extracted successfully");
-                return true;
-            } else {
-                Log.w(TAG, "Frida Gadget not found in assets, using OTA download");
-                return true; // Not an error - will use OTA downloaded version
-            }
+            // Note: Frida Gadget extraction removed - now using ptrace-based injection
+            // All injection functionality integrated into libbearmod.so via libclient_static
+            Log.d(TAG, "Using ptrace-based injection system (no Frida Gadget required)");
+            return true;
             
         } catch (Exception e) {
             Log.e(TAG, "Error extracting Frida Gadget", e);
@@ -51,39 +46,58 @@ public class AssetExtractor {
     }
     
     /**
-     * Extract ALL JavaScript payloads from assets to cache directory
-     * CRITICAL: This solves the missing script execution bridge
+     * Extract JavaScript payload to memory buffer (MEMORY-ONLY APPROACH)
+     * UPDATED: Aligns with SecureScriptManager memory-only patterns
+     * No filesystem storage - returns script content directly
      */
-    public static boolean extractJavaScriptPayloads(Context context, String targetPackage) {
+    public static String extractScriptToMemory(Context context, String scriptName) {
         try {
-            Log.d(TAG, "Extracting JavaScript payloads for: " + targetPackage);
-            
-            // Create script cache directory
-            String scriptDir = "/data/data/" + targetPackage + "/cache/scripts";
-            File cacheDir = new File(scriptDir);
-            if (!cacheDir.exists() && !cacheDir.mkdirs()) {
-                Log.e(TAG, "Failed to create script cache directory: " + scriptDir);
-                return false;
+            Log.d(TAG, "Extracting script to memory: " + scriptName);
+
+            // Map script names to asset paths
+            String assetPath = getAssetPathForScript(scriptName);
+            if (assetPath == null) {
+                Log.w(TAG, "Unknown script name: " + scriptName);
+                return null;
             }
-            
-            // Extract core scripts
+
+            // Extract directly to memory (no filesystem storage)
+            return extractAssetToMemory(context, assetPath);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error extracting script to memory: " + scriptName, e);
+            return null;
+        }
+    }
+
+    /**
+     * Extract all JavaScript payloads to memory (CONSOLIDATED APPROACH)
+     * Returns Map<scriptName, scriptContent> for batch processing
+     */
+    public static Map<String, String> extractAllScriptsToMemory(Context context) {
+        Map<String, String> scripts = new HashMap<>();
+
+        try {
+            Log.d(TAG, "Extracting all scripts to memory");
+
+            // Core scripts mapping
             String[] coreScripts = {
-                "script/anti-detection.js",
-                "script/bearmod_analyzer.js", 
-                "script/bypass-ssl.js",
-                "script/bypass-signkill.js",
-                "script/config.js",
-                "script/quick_hook.js"
+                "anti-detection.js",
+                "bearmod_analyzer.js",
+                "bypass-ssl.js",
+                "bypass-signkill.js",
+                "config.js",
+                "quick_hook.js"
             };
-            
-            for (String scriptAsset : coreScripts) {
-                String fileName = new File(scriptAsset).getName();
-                String outputPath = scriptDir + "/" + fileName;
-                
-                if (extractAssetFile(context, scriptAsset, outputPath)) {
-                    Log.d(TAG, "Extracted script: " + fileName);
+
+            for (String scriptName : coreScripts) {
+                String scriptContent = extractScriptToMemory(context, scriptName);
+                if (scriptContent != null) {
+                    String scriptId = scriptName.replace(".js", "").replace("_", "-");
+                    scripts.put(scriptId, scriptContent);
+                    Log.d(TAG, "Extracted script to memory: " + scriptId);
                 } else {
-                    Log.w(TAG, "Failed to extract script: " + fileName);
+                    Log.w(TAG, "Failed to extract script: " + scriptName);
                 }
             }
             
@@ -98,21 +112,65 @@ public class AssetExtractor {
             
             for (String scriptAsset : variantScripts) {
                 String fileName = new File(scriptAsset).getName();
-                String outputPath = scriptDir + "/" + fileName;
-                
-                if (extractAssetFile(context, scriptAsset, outputPath)) {
-                    Log.d(TAG, "Extracted payload: " + fileName);
+                String scriptContent = extractScriptToMemory(context, scriptAsset);
+
+                if (scriptContent != null) {
+                    String scriptId = fileName.replace(".js", "").replace("_", "-");
+                    scripts.put(scriptId, scriptContent);
+                    Log.d(TAG, "Extracted payload to memory: " + scriptId);
                 } else {
                     Log.w(TAG, "Failed to extract payload: " + fileName);
                 }
             }
             
-            Log.d(TAG, "JavaScript payload extraction completed");
-            return true;
-            
+            Log.d(TAG, "All scripts extracted to memory: " + scripts.size() + " scripts");
+            return scripts;
+
         } catch (Exception e) {
-            Log.e(TAG, "Error extracting JavaScript payloads", e);
-            return false;
+            Log.e(TAG, "Error extracting scripts to memory", e);
+            return new HashMap<>();
+        }
+    }
+
+    /**
+     * Map script names to asset paths
+     */
+    private static String getAssetPathForScript(String scriptName) {
+        Map<String, String> assetMappings = new HashMap<>();
+        assetMappings.put("anti-detection.js", "script/anti-detection.js");
+        assetMappings.put("bearmod_analyzer.js", "script/bearmod_analyzer.js");
+        assetMappings.put("bypass-ssl.js", "script/bypass-ssl.js");
+        assetMappings.put("bypass-signkill.js", "script/bypass-signkill.js");
+        assetMappings.put("config.js", "script/config.js");
+        assetMappings.put("quick_hook.js", "script/quick_hook.js");
+
+        return assetMappings.get(scriptName);
+    }
+
+    /**
+     * Extract single asset to memory buffer (no filesystem storage)
+     */
+    private static String extractAssetToMemory(Context context, String assetPath) {
+        try {
+            AssetManager assetManager = context.getAssets();
+            InputStream input = assetManager.open(assetPath);
+
+            // Read entire asset to memory
+            StringBuilder content = new StringBuilder();
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+
+            while ((bytesRead = input.read(buffer)) != -1) {
+                content.append(new String(buffer, 0, bytesRead, java.nio.charset.StandardCharsets.UTF_8));
+            }
+
+            input.close();
+
+            return content.toString();
+
+        } catch (IOException e) {
+            Log.d(TAG, "Asset not found or extraction failed: " + assetPath);
+            return null;
         }
     }
     

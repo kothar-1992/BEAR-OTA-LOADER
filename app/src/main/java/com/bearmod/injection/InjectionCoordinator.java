@@ -49,16 +49,16 @@ public class InjectionCoordinator {
     
     /**
      * Stop the current injection process
+     *
      * @param managerName Name of the manager stopping injection (must match the one that started it)
-     * @return true if injection was successfully stopped, false if not authorized or no injection active
      */
-    public static boolean stopInjection(String managerName) {
+    public static void stopInjection(String managerName) {
         String activeManager = currentInjectionManager.get();
         
         if (activeManager == null || !activeManager.equals(managerName)) {
             Log.w(TAG, "Unauthorized injection stop attempt by " + managerName + 
                   ". Active manager: " + activeManager);
-            return false;
+            return;
         }
         
         if (globalInjectionActive.compareAndSet(true, false)) {
@@ -72,10 +72,8 @@ public class InjectionCoordinator {
             
             Log.d(TAG, "Injection stopped by " + managerName + " for package: " + targetPackage + 
                   " (duration: " + duration + "ms)");
-            return true;
         } else {
             Log.w(TAG, "No active injection to stop by " + managerName);
-            return false;
         }
     }
     

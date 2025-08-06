@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.bearmod.security.SignatureVerifier;
 import com.bearmod.patch.model.PatchResult;
+import com.bearmod.patch.SecureScriptManager;
 import com.bearmod.injection.KeyAuthInjectionManager;
 
 import java.io.File;
@@ -56,10 +57,10 @@ public class NonRootPatchManager {
                 
                 callback.onPatchProgress(30);
                 
-                // Load patch script from KeyAuth secure delivery
+                // Load patch script from centralized FileHelper system
                 String scriptContent = SecureScriptManager.getInstance(context).loadScript(patchId);
                 if (scriptContent == null) {
-                    callback.onPatchFailed("Failed to load patch script from KeyAuth: " + patchId);
+                    callback.onPatchFailed("Failed to load patch script from centralized system: " + patchId);
                     return;
                 }
                 
@@ -94,19 +95,28 @@ public class NonRootPatchManager {
         }
     }
     
+    /**
+     * Load patch script using centralized FileHelper system
+     * SECURITY: Scripts now delivered via KeyAuth instead of assets
+     * DEPRECATED: Asset loading removed for security reasons
+     */
     private String loadPatchScript(Context context, String patchId) {
         try {
-            String assetPath = "patches/" + patchId + "/script.js";
-            InputStream input = context.getAssets().open(assetPath);
-            
-            byte[] buffer = new byte[input.available()];
-            input.read(buffer);
-            input.close();
-            
-            return new String(buffer);
-            
+            Log.d(TAG, "Loading script from centralized system: " + patchId);
+
+            // Use SecureScriptManager with centralized FileHelper system
+            String scriptContent = SecureScriptManager.getInstance(context).loadScript(patchId);
+
+            if (scriptContent != null) {
+                Log.d(TAG, "Script loaded from centralized system: " + patchId + " (" + scriptContent.length() + " chars)");
+                return scriptContent;
+            } else {
+                Log.e(TAG, "Failed to load script from centralized system: " + patchId);
+                return null;
+            }
+
         } catch (Exception e) {
-            Log.e(TAG, "Error loading patch script", e);
+            Log.e(TAG, "Error loading patch script from centralized system: " + patchId, e);
             return null;
         }
     }
@@ -119,7 +129,7 @@ public class NonRootPatchManager {
             Log.d(TAG, "Applying embedded patch: " + patchId + " to " + targetPackage);
             
             // Method 1: Native library injection (if available)
-            if (tryNativeInjection(targetPackage, patchId, scriptContent)) {
+            if (tryNativeInjection(context, targetPackage, patchId, scriptContent)) {
                 Log.d(TAG, "Native injection successful for: " + patchId);
                 return true;
             }
@@ -148,7 +158,7 @@ public class NonRootPatchManager {
     /**
      * Try native library injection with KeyAuth integration
      */
-    private boolean tryNativeInjection(String targetPackage, String patchId, String scriptContent) {
+    private boolean tryNativeInjection(Context context, String targetPackage, String patchId, String scriptContent) {
         try {
             Log.d(TAG, "Attempting KeyAuth-based native injection");
 
@@ -161,7 +171,7 @@ public class NonRootPatchManager {
                 final boolean[] injectionComplete = {false};
                 final boolean[] injectionSuccess = {false};
 
-                keyAuthManager.performInjection(null, targetPackage, patchId, new KeyAuthInjectionManager.InjectionCallback() {
+                keyAuthManager.performInjection(context, targetPackage, patchId, new KeyAuthInjectionManager.InjectionCallback() {
                     @Override
                     public void onInjectionStarted() {
                         Log.d(TAG, "KeyAuth injection started");
@@ -184,7 +194,7 @@ public class NonRootPatchManager {
 
                     @Override
                     public void onInjectionFailed(String error) {
-                        Log.e(TAG, "KeyAuth injection failed: " + error);
+                        Log.e(TAG, "BearMod injection failed: " + error);
                         synchronized (injectionComplete) {
                             injectionSuccess[0] = false;
                             injectionComplete[0] = true;
@@ -198,7 +208,7 @@ public class NonRootPatchManager {
                     while (!injectionComplete[0]) {
                         injectionComplete.wait(30000); // 30 second timeout
                         if (!injectionComplete[0]) {
-                            Log.w(TAG, "KeyAuth injection timeout");
+                            Log.w(TAG, "BearMod injection timeout");
                             break;
                         }
                     }
@@ -208,7 +218,7 @@ public class NonRootPatchManager {
             }
 
             // Fallback to traditional native injection
-            Log.d(TAG, "KeyAuth not ready, falling back to traditional native injection");
+            Log.d(TAG, "BearMod not ready, falling back to traditional native injection");
             return nativeInjectPatch(targetPackage, patchId, scriptContent);
 
         } catch (UnsatisfiedLinkError e) {
@@ -288,8 +298,7 @@ public class NonRootPatchManager {
 
     static {
         try {
-            System.loadLibrary("BearMod"); // Load your existing native library
-            System.loadLibrary("BEAR"); 
+            System.loadLibrary("bearmod"); // Load existing native library (correct name)
             Log.d(TAG, "Native library loaded successfully");
         } catch (UnsatisfiedLinkError e) {
             Log.w(TAG, "Native library not available, using Java fallback methods");

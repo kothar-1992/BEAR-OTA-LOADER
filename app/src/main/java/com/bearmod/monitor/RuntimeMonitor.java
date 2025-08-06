@@ -235,7 +235,7 @@ public class RuntimeMonitor {
     
     static {
         try {
-            System.loadLibrary("BearMod"); // Load existing native library
+            System.loadLibrary("bearmod"); // Load existing native library (correct name)
             Log.d(TAG, "Native library loaded for runtime monitoring");
         } catch (UnsatisfiedLinkError e) {
             Log.e(TAG, "Failed to load native library for monitoring", e);

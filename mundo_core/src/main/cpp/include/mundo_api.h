@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 // Mundo API Version
-#define MUNDO_API_VERSION "1.0.0"
+#define MUNDO_API_VERSION "2.0.0"
 
 // Configuration structure
 typedef struct {

@@ -31,7 +31,24 @@ static std::vector<std::string> g_hiddenProcesses = {"frida-server", "frida-agen
 static std::vector<std::string> g_hiddenLibraries = {"libfrida-gadget.so", "libhelper.so", "libbearmod.so"};
 static std::vector<std::string> g_hiddenFiles = {"/data/local/tmp/bearmod_", "/data/local/tmp/libhelper"};
 
-StealthManager::StealthManager(const Config& config) 
+StealthManager::StealthManager()
+    : config_(Config{}), stealthActive_(false) {
+
+    // Initialize default hidden items
+    if (config_.hiddenProcessNames.empty()) {
+        config_.hiddenProcessNames = g_hiddenProcesses;
+    }
+    if (config_.hiddenLibraryNames.empty()) {
+        config_.hiddenLibraryNames = g_hiddenLibraries;
+    }
+    if (config_.hiddenFilePatterns.empty()) {
+        config_.hiddenFilePatterns = g_hiddenFiles;
+    }
+
+    LOGI("StealthManager initialized with default config");
+}
+
+StealthManager::StealthManager(const Config& config)
     : config_(config), stealthActive_(false) {
     
     // Initialize default hidden items

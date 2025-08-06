@@ -7,12 +7,12 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        minSdk = 24  // Lower for broader compatibility
+        minSdk = 28
         // Hybrid build system support: CMake (default) + Android.mk (fallback)
         externalNativeBuild {
             cmake {
                 cppFlags ("-std=c++17", "-fvisibility=hidden", "-ffunction-sections", "-fdata-sections")
-                arguments ("-DMUNDO_LIBRARY_BUILD=1", "-DNATIVE_RUNTIME_CONTAINER=1")
+                arguments ("-DMUNDO_LIBRARY_BUILD=1", "-DNATIVE_RUNTIME_CONTAINER=1", "-DANDROID_ARM64_V8A=1")
             }
             // Alternative: Android.mk support (uncomment to use existing Android.mk)
             // ndkBuild {
@@ -24,8 +24,7 @@ android {
             // }
         }
         ndk {
-            //noinspection ChromeOsAbiSupport
-            abiFilters += listOf("arm64-v8a")
+            abiFilters.add("arm64-v8a") // This tells Gradle to only build for arm64-v8a
         }
     }
 
@@ -42,7 +41,6 @@ android {
         }
         debug {
             isJniDebuggable = true
-         //   isDebuggable = true
 
             externalNativeBuild {
                 cmake {
@@ -78,7 +76,7 @@ android {
 
     // Production build configuration
     buildFeatures {
-        prefab = true
+        prefab = false
     }
 
     compileOptions {
@@ -91,7 +89,7 @@ android {
 // Final combo task
 tasks.register("rebuildAndDeployLibmundo") {
     group = "mundo_core"
-    description = "🛠 Clean + Build + Deploy libmundo.so to Plugin/app"
+    description = "🛠 Clean + Build + Deploy libmundo.so to app"
 
     dependsOn("cleanLibmundo", "deployLibmundo")
 }
@@ -102,7 +100,6 @@ dependencies {
             
 implementation (libs.appcompat)
 implementation (libs.material)
-
 testImplementation (libs.junit)
 androidTestImplementation (libs.ext.junit)
 androidTestImplementation (libs.espresso.core)
@@ -114,7 +111,7 @@ androidTestImplementation (libs.espresso.core)
 println ("🏗️  mundo_core module configured:")
 println ("   → Native Runtime Container (libmundo.so)")
 println ("   → Build System: CMake (primary) + Android.mk (fallback)")
-println ("   → Auto-copy to Plugin/ and app/ modules")
+println ("   → Auto-copy to app/ modules")
 println ("   → Architectures: arm64-v8a, armeabi-v7a")
 println ("   → Security: KeyAuth bridge, anti-hook, non-root injection")
 println ("   → Integration: Bridge APIs for existing BearMod components")

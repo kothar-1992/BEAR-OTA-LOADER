@@ -46,6 +46,7 @@ tasks.register("cleanBearMod") {
                 commandLine("adb", "-s", serial, "shell", "rm", "-rf", "/data/local/tmp/libhelper*")
                 isIgnoreExitValue = true
             }
+            // Note: libhelper cleanup kept for removing old installations
         }
 
         println("BearMod cleanup completed")
@@ -202,15 +203,15 @@ tasks.register("testInjectionSystem") {
             }
         }
 
-        // Test Frida Gadget
+        // Test ptrace-based injection system (replaces Frida Gadget)
         exec {
-            commandLine("adb", "-s", deviceSerial, "shell", "test", "-f", "$deploymentPath/libhelper.so")
+            commandLine("adb", "-s", deviceSerial, "shell", "test", "-f", "$deploymentPath/libbearmod.so")
             isIgnoreExitValue = true
         }.let { result ->
             if (result.exitValue == 0) {
-                println("✓ Frida Gadget deployed")
+                println("✓ ptrace injection system deployed")
             } else {
-                println("✗ Frida Gadget missing")
+                println("✗ ptrace injection system missing")
             }
         }
 
@@ -259,8 +260,8 @@ tasks.register("validateStealth") {
             }
         }
 
-        // Check file hiding
-        val hiddenFiles = listOf("bearmod_global.js", "bearmod_korea.js", "libhelper.so")
+        // Check file hiding (updated for ptrace-based system)
+        val hiddenFiles = listOf("bearmod_global.js", "bearmod_korea.js", "libbearmod.so")
         hiddenFiles.forEach { file ->
             exec {
                 commandLine("adb", "-s", deviceSerial, "shell", "ls", "$deploymentPath/$file")
@@ -293,7 +294,7 @@ tasks.register("benchmarkPerformance") {
         val startTime = System.currentTimeMillis()
 
         exec {
-            commandLine("adb", "-s", deviceSerial, "shell", "time", "ls", "$deploymentPath/libhelper.so")
+            commandLine("adb", "-s", deviceSerial, "shell", "time", "ls", "$deploymentPath/libbearmod.so")
         }
 
         val loadTime = System.currentTimeMillis() - startTime

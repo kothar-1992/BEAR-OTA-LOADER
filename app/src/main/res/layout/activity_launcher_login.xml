@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/login_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bearmod_login_background"
-    android:padding="32dp">
+    android:background="@drawable/bearmod_login_background">
 
-    <!-- Main Content Container -->
-    <LinearLayout
+    <!-- Scrollable Content Container -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:padding="32dp">
+
+        <!-- Main Content Container -->
+        <LinearLayout
+            android:id="@+id/login_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
 
         <!-- Circular Logo Container -->
         <FrameLayout
@@ -92,31 +97,40 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="32dp">
+            android:layout_marginBottom="32dp"
+            android:layout_marginTop="16dp">
 
             <!-- Remember Key Checkbox -->
             <CheckBox
                 android:id="@+id/checkbox_remember_key"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Remember Key"
                 android:textColor="#CCCCCC"
                 android:textSize="16sp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="16dp"
                 android:button="@drawable/bearmod_checkbox_selector"
-                android:paddingStart="8dp"
+                android:paddingStart="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:minHeight="48dp"
+                android:drawablePadding="8dp"
                 tools:ignore="HardcodedText,RtlSymmetry" />
 
             <!-- Automatic Login Checkbox -->
             <CheckBox
                 android:id="@+id/checkbox_auto_login"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Automatic login"
                 android:textColor="#CCCCCC"
                 android:textSize="16sp"
                 android:button="@drawable/bearmod_checkbox_selector"
-                android:paddingStart="8dp"
+                android:paddingStart="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:minHeight="48dp"
+                android:drawablePadding="8dp"
                 tools:ignore="HardcodedText,RtlSymmetry" />
         </LinearLayout>
 
@@ -154,18 +168,19 @@
             android:layout_marginTop="16dp"
             android:visibility="gone"/>
 
-    </LinearLayout>
+            <!-- Version Text -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="1.0.6"
+                android:textColor="#78909C"
+                android:textSize="14sp"
+                android:gravity="center"
+                tools:ignore="HardcodedText" />
 
-    <!-- Version Text -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="24dp"
-        android:text="1.0.6"
-        android:textColor="#78909C"
-        android:textSize="14sp"
-        tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+    </ScrollView>
 
 </RelativeLayout>

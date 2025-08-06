@@ -35,7 +35,7 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="BEARMOD"
+            android:text="BEARMOD" 
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -46,7 +46,7 @@
             android:id="@+id/status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="loading"
+            android:text="Loading..."
             android:textColor="#00FF00"
             android:textSize="14sp"
             android:layout_marginBottom="32dp" />

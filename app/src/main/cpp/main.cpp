@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <dlfcn.h>
+#include <android/log.h>
 
 #include "Data_Folder/imgui/imgui.h"
 #include "Data_Folder/imgui/imgui_impl_android.h"
@@ -35,6 +36,37 @@
 #include "Data_Folder/Helper/ElfImg.h"
 #include "Data_Folder/Helper/Rect.h"
 #include "Data_Folder/Helper/Quaternion.hpp"
+
+// Clean toast utility function for debugging (replaces scattered toast implementations)
+void ShowToast(JNIEnv *env, jobject context, const char* message) {
+    jclass toastClass = env->FindClass("android/widget/Toast");
+    if (!toastClass) return;
+
+    jmethodID makeText = env->GetStaticMethodID(toastClass, "makeText",
+        "(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;");
+    if (!makeText) {
+        env->DeleteLocalRef(toastClass);
+        return;
+    }
+
+    jmethodID show = env->GetMethodID(toastClass, "show", "()V");
+    if (!show) {
+        env->DeleteLocalRef(toastClass);
+        return;
+    }
+
+    jstring jMessage = env->NewStringUTF(message);
+    jobject toast = env->CallStaticObjectMethod(toastClass, makeText,
+        context, jMessage, 0); // 0 = LENGTH_SHORT
+
+    if (toast) {
+        env->CallVoidMethod(toast, show);
+        env->DeleteLocalRef(toast);
+    }
+
+    env->DeleteLocalRef(jMessage);
+    env->DeleteLocalRef(toastClass);
+}
 #include "Data_Folder/Substrate/SubstrateHook.h"
 #include "Data_Folder/patch/MemoryPatch.h"
 #include "Data_Folder/Includes/Macros.h"
@@ -276,7 +308,8 @@ ImFont* basic = nullptr;
 #include <string.h>
 bool Logo = true;
 float accent_color[4] = { 0.300f, 0.220f, 0.750f, 1.000f };
-#include <curl/curl.h>
+// REMOVED: CURL includes - replaced with KeyAuth API integration via mundo_core
+// #include <curl/curl.h>
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 
@@ -284,7 +317,8 @@ using json = nlohmann::json;
 int gScreenWidth;
 int gScreenHeight;
 // ======================================================================== //
-#include <curl/curl.h>
+// REMOVED: CURL includes - using KeyAuth API via mundo_core bridge
+// #include <curl/curl.h>
 #include <openssl/evp.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
@@ -2123,27 +2157,29 @@ const char *GetDeviceUniqueIdentifier(JNIEnv *env, const char *uuid) {
     return env->GetStringUTFChars(str, 0);
 }
 
-#include <curl/curl.h>
-struct MemoryStruct {
-    char *memory;
-    size_t size;
-};
+// REMOVED: CURL includes and MemoryStruct - replaced with KeyAuth API integration
+// #include <curl/curl.h>
+// struct MemoryStruct {
+//     char *memory;
+//     size_t size;
+// };
 
-static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp) {
-    size_t realsize = size * nmemb;
-    struct MemoryStruct *mem = (struct MemoryStruct *) userp;
-
-    mem->memory = (char *) realloc(mem->memory, mem->size + realsize + 1);
-    if (mem->memory == NULL) {
-        return 0;
-    }
-
-    memcpy(&(mem->memory[mem->size]), contents, realsize);
-    mem->size += realsize;
-    mem->memory[mem->size] = 0;
-
-    return realsize;
-}
+// REMOVED: WriteMemoryCallback function - no longer needed with KeyAuth API integration
+// static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+//     size_t realsize = size * nmemb;
+//     struct MemoryStruct *mem = (struct MemoryStruct *) userp;
+//
+//     mem->memory = (char *) realloc(mem->memory, mem->size + realsize + 1);
+//     if (mem->memory == NULL) {
+//         return 0;
+//     }
+//
+//     memcpy(&(mem->memory[mem->size]), contents, realsize);
+//     mem->size += realsize;
+//     mem->memory[mem->size] = 0;
+//
+//     return realsize;
+// }
 
 //#include "LicenseTools.h"
 
@@ -2153,131 +2189,100 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 // This method should be replaced with MundoCore bridge initialization
 extern "C" JNIEXPORT void JNICALL
 Java_com_bearmod_Launcher_Init(JNIEnv *env, jclass clazz, jobject mContext) {
-    // szToast = "Modded by Kuroyama\nTelegram: @KuroHackOfficial"
-    char szToast[47] = {0x28, 0x08, 0x05, 0x07, 0x08, 0x0B, 0x51, 0x11,
-                        0x2C, 0x57, 0x3E, 0x26, 0x2B, 0x20, 0x38, 0x22,
-                        0x28, 0x26, 0x8F, 0x57, 0x28, 0x33, 0x2C, 0x2C,
-                        0x43, 0x36, 0x3C, 0x91, 0x7D, 0x5F, 0x66, 0x4E,
-                        0x53, 0x48, 0x71, 0x4A, 0x4A, 0x54, 0x72, 0x4D,
-                        0x4F, 0x5E, 0x56, 0x62, 0x5C, 0x63, 0xC1};
-
-    for (unsigned int oywdm = 0, SmnWs = 0; oywdm < 47; oywdm++) {
-        SmnWs = szToast[oywdm];
-        SmnWs++;
-        SmnWs -= oywdm;
-        SmnWs++;
-        SmnWs -= oywdm;
-        SmnWs ^= 0x67;
-        szToast[oywdm] = SmnWs;
+    jclass mundoCoreClass = env->FindClass("com/bearmod/MundoCore");
+    if (!mundoCoreClass) {
+        __android_log_print(ANDROID_LOG_ERROR, "BearMod", "MundoCore class not found.");
+        return;
     }
 
-    jstring pMsg = env->NewStringUTF(szToast);
+    // Get singleton instance
+    jmethodID getInstance = env->GetStaticMethodID(mundoCoreClass, "getInstance", "(Landroid/content/Context;)Lcom/bearmod/MundoCore;");
+    if (!getInstance) {
+        __android_log_print(ANDROID_LOG_ERROR, "BearMod", "MundoCore.getInstance method not found.");
+        env->DeleteLocalRef(mundoCoreClass);
+        return;
+    }
+
+    jobject mundoInstance = env->CallStaticObjectMethod(mundoCoreClass, getInstance, mContext);
+    if (!mundoInstance) {
+        __android_log_print(ANDROID_LOG_ERROR, "BearMod", "Failed to get MundoCore instance.");
+        env->DeleteLocalRef(mundoCoreClass);
+        return;
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "BearMod", "MundoCore instance obtained successfully.");
+
+    // Cleanup
+    env->DeleteLocalRef(mundoInstance);
+    env->DeleteLocalRef(mundoCoreClass);
 
 
-
-
-
-    jclass toastClass = env->FindClass(/*android/widget/Toast*/ StrEnc("eCS7dp(}Z:2f/$i/S'CO", "\x04\x2D\x37\x45\x0B\x19\x4C\x52\x2D\x53\x56\x01\x4A\x50\x46\x7B\x3C\x46\x30\x3B", 20).c_str());
-    jmethodID makeTextMethod = env->GetStaticMethodID(toastClass, /*makeText*/ StrEnc("jI/4d64U", "\x07\x28\x44\x51\x30\x53\x4C\x21", 8).c_str(), /*(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;*/ StrEnc("H#L{!#l1/A\"2Z.X>f@XyZ3A*Za^XIT6&u0^zeYt%go5U[V!{X6(RXl>-!sFl9cE(l^[%f\\a2XM", "\x60\x6F\x2D\x15\x45\x51\x03\x58\x4B\x6E\x41\x5D\x34\x5A\x3D\x50\x12\x6F\x1B\x16\x34\x47\x24\x52\x2E\x5A\x12\x32\x28\x22\x57\x09\x19\x51\x30\x1D\x4A\x1A\x1C\x44\x15\x3C\x50\x24\x2E\x33\x4F\x18\x3D\x0D\x61\x7B\x14\x0D\x50\x49\x53\x1C\x2F\x08\x16\x14\x2C\x4C\x0B\x3B\x2F\x0A\x32\x33\x00\x41\x2C\x76", 74).c_str());
-
-    jobject toastObj = env->CallStaticObjectMethod(toastClass, makeTextMethod, mContext, pMsg, 0);
-
-    auto pkgName = GetPackageName(env, mContext);
-
-    //StartRuntimeHook(pkgName);
 }
 
-// TODO Plan-B: REPLACEABLE - Replace with mundo_core KeyAuth authentication
-// This method should be replaced with MundoCore.authenticateKeyAuth() bridge call
-// PRESERVE: The g_Token/g_Auth validation logic below must be maintained
+// REMOVED: Complex KeyAuth API Integration via JNI Bridge
+// The authentication is now handled entirely in Java layer using SimpleLicenseVerifier
+// This simplifies the codebase and eliminates JNI authentication complexity
+
+// Simple authentication status check - reads from Java SharedPreferences
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_bearmod_Launcher_Check(JNIEnv *env, jclass clazz, jobject mContext, jstring mUserKey) {
-    auto userKey = env->GetStringUTFChars(mUserKey, 0);
-    
-    std::string hwid = userKey;
-    hwid += GetAndroidID(env, mContext);
-    hwid += GetDeviceModel(env);
-    hwid += GetDeviceBrand(env);
-    std::string UUID = GetDeviceUniqueIdentifier(env, hwid.c_str());
-    
-    std::string errMsg;
-    
-    struct MemoryStruct chunk{};
-    chunk.memory = (char *) malloc(1);
-    chunk.size = 0;
-    
-    CURL *curl;
-    CURLcode res;
-    curl = curl_easy_init();
-    
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, _enc_("POST"));
-        curl_easy_setopt(curl, CURLOPT_URL, _enc_("https://free-panel.gleeze.com/connect"));
+    // Authentication is now handled entirely in Java layer
+    // This method simply checks if authentication was successful in Java
 
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, _enc_("https"));
+    try {
+        // Get SharedPreferences to check authentication status
+        jclass contextClass = env->GetObjectClass(mContext);
+        jmethodID getSharedPrefsMethod = env->GetMethodID(contextClass, "getSharedPreferences",
+            "(Ljava/lang/String;I)Landroid/content/SharedPreferences;");
 
-        struct curl_slist *headers = NULL;
-        headers = curl_slist_append(headers, _enc_("Content-Type: application/x-www-form-urlencoded"));
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        jstring prefName = env->NewStringUTF("bearmod_auth");
+        jobject sharedPrefs = env->CallObjectMethod(mContext, getSharedPrefsMethod, prefName, 0);
 
-        char data[4096];
-        sprintf(data, _enc_("game=PUBG&user_key=%s&serial=%s"), userKey, UUID.c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
-        
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &chunk);
-        
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        if (sharedPrefs) {
+            jclass prefsClass = env->GetObjectClass(sharedPrefs);
+            jmethodID getBooleanMethod = env->GetMethodID(prefsClass, "getBoolean", "(Ljava/lang/String;Z)Z");
 
-        res = curl_easy_perform(curl);
-        if (res == CURLE_OK) {
-            try {
-                json result = json::parse(chunk.memory);
-                if (result.contains("status") && result["status"] == true) {
-                    if (result.contains("data") && result["data"].contains("token") && !result["data"]["token"].is_null() && result["data"].contains("rng") && !result["data"]["rng"].is_null()) {
-                        std::string token = result["data"]["token"].get<std::string>();
-                        time_t rng = result["data"]["rng"].get<time_t>();
-                        
-                        if (rng + 30 > time(0)) {
-                            std::string auth = enc("PUBG");
-                            auth += "-";
-                            auth += userKey; //userKey
-                            auth += "-";
-                            auth += UUID;
-                            auth += "-";
-                            auth += enc("Vm8Lk7Uj2JmsjCPVPVjrLa7zgfx3uz9E");
-                            std::string outputAuth = Tools::CalcMD5(auth);
-                         
-                            g_Token = token;
-                            g_Auth = outputAuth;
-                            if (result["data"].contains("EXP") && !result["data"]["EXP"].is_null()) {
-                                EXP = result ["data"]["EXP"];
-                            }
-                            // CRITICAL: This authentication logic must be preserved during mundo_core integration
-                            bValid = g_Token == g_Auth;
-                        }
-                    } else {
-                        errMsg = "Missing token or rng in response";
-                    }
-                } else {
-                    if (result.contains("reason") && !result["reason"].is_null()) {
-                        errMsg = result["reason"].get<std::string>();
-                    } else {
-                        errMsg = "Unknown error (no reason provided)";
-                    }
-                }
-            } catch (json::exception &e) {
-                errMsg = e.what();
+            jstring authKey = env->NewStringUTF("is_authenticated");
+            jboolean isAuthenticated = env->CallBooleanMethod(sharedPrefs, getBooleanMethod, authKey, JNI_FALSE);
+
+            if (isAuthenticated == JNI_TRUE) {
+                // Set authentication variables for ESP compatibility
+                g_Token = "AUTHENTICATED";
+                g_Auth = "AUTHENTICATED";
+                bValid = true;
+                EXP = time(0) + 86400; // 24h
+
+                // Cleanup
+                env->DeleteLocalRef(authKey);
+                env->DeleteLocalRef(prefsClass);
+                env->DeleteLocalRef(sharedPrefs);
+                env->DeleteLocalRef(prefName);
+                env->DeleteLocalRef(contextClass);
+
+                return env->NewStringUTF("OK");
             }
-        } else {
-            errMsg = curl_easy_strerror(res);
+
+            // Cleanup
+            env->DeleteLocalRef(authKey);
+            env->DeleteLocalRef(prefsClass);
+            env->DeleteLocalRef(sharedPrefs);
         }
+
+        env->DeleteLocalRef(prefName);
+        env->DeleteLocalRef(contextClass);
+
+    } catch (...) {
+        // Fallback on any exception
     }
-    curl_easy_cleanup(curl);
-    return bValid ? env->NewStringUTF("OK") : env->NewStringUTF(errMsg.c_str());
+
+    // Authentication failed or not completed in Java layer
+    bValid = false;
+    g_Token = "";
+    g_Auth = "";
+    return env->NewStringUTF("Authentication required - please complete login in Java layer");
 }
+
+
 // REMOVED: UI String JNI method implementations - replaced with hardcoded strings in Java
 // These 9 C++ implementations were removed as part of Plan-A cleanup:
 // Java_com_bearmod_Launcher_LoginNameNrg, Java_com_bearmod_Launcher_Pleaselog,
